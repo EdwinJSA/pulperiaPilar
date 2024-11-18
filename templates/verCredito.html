@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<main class="container">
+        <!-- Listado de personas con deudas -->
+        <h3>Listado de Personas con Deudas</h3>
+        <ul id="personas-deudas" class="list-group">
+        
+        </ul>
+    
+        <!-- Detalles del Crédito (oculto al principio) -->
+        <div id="detalle-credito" class="d-none mt-4">
+            <h4>Detalles del Crédito</h4>
+            <div id="detalle-info"></div>
+            <button class="btn btn-info mt-3" onclick="cerrarDetalles()">Cerrar</button>
+        </div>
+</main>
+{% endblock  %}

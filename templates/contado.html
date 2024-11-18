@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- Contenido de la página -->
+<main class="container mt-4">
+    <!-- Sección de detalles de la venta -->
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Agregar Productos</h3>
+        <div class="summary">
+            <p>ID de Venta: <span id="sale-id"></span></p>
+            <p>Total de la Venta: C$<span id="total-purchase"></span></p>
+        </div>
+    </div>
+
+<!-- Formulario para agregar productos -->
+<div class="card p-3 mb-3">
+    <div class="row">
+        <form id="product-form">
+            <div class="col-md-6">
+                <label for="product-name" class="form-label">Producto</label>
+                <input type="text" class="form-control" id="product-name" placeholder="Ingresa el nombre del producto">
+            </div>
+            <div class="col-md-3">
+                <label for="product-quantity" class="form-label">Cantidad</label>
+                <input type="number" class="form-control" id="product-quantity" placeholder="Cantidad" min="1">
+            </div>
+            <div class="col-md-3">
+                <label for="product-price" class="form-label">Precio Unitario</label>
+                <input type="number" class="form-control" id="product-price" placeholder="Precio" min="0" step="0.01">
+            </div>
+            <button class="btn mt-3" id="agregar" type="button" style="background-color: #B2C568; color: #fff;">Agregar Producto</button>
+        </form>
+    </div>
+</div>
+
+    <!-- Tabla para mostrar los productos agregados -->
+    <div class="card">
+        <div class="card-body">
+            <h5><strong>Productos Adquiridos</strong></h5>
+            <div class="product-list">
+                <table class="table table-bordered" id="product-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body">
+                        <!-- Aquí se mostrarán los productos agregados -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón para guardar la compra -->
+    <div class="text-end mt-3" id="guardarVenta">
+        <button class="btn btn-success">Guardar Venta</button>
+    </div>
+</main>
+
+{% endblock  %}

@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<main class="container">
+    <!-- Sección de Cliente -->
+    <div class="cliente-container mb-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h3>Cliente</h3>
+            <div class="summary">
+                <p>ID Cliente: <span id="id-cliente"></span></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Nombre" aria-label="First name">
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Apellido" aria-label="Last name">
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Crédito -->
+    <h3>Agregar Crédito</h3>
+    <form id="credito-form">
+        <div class="mb-3">
+            <label for="producto" class="form-label">Producto</label>
+            <input type="text" class="form-control" id="producto" placeholder="Producto adquirido">
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="cantidad" class="form-label">Cantidad</label>
+                <input type="number" class="form-control" id="cantidad" placeholder="Cantidad" min="1">
+            </div>
+            <div class="col">
+                <label for="precio-unitario" class="form-label">Precio Unitario</label>
+                <input type="number" class="form-control" id="precio-unitario" placeholder="Precio Unitario" step="0.01">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="total-credito" class="form-label">Total de Crédito</label>
+            <input type="number" class="form-control" id="total-credito" placeholder="Total del Crédito" step="0.01" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="fecha-credito" class="form-label">Fecha de Adquisición</label>
+            <input type="date" class="form-control" id="fecha-credito">
+        </div>
+        <button type="button" class="btn btn-cancelar" onclick="cancelarCredito()">Añadir Crédito</button>
+    </form>
+</main>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"
+></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+    crossorigin="anonymous"
+></script>
+
+{% endblock  %}

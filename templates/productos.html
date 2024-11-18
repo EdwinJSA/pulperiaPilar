@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <form class="row g-2 align-items-center">
+            <div class="col-auto">
+              <label for="inputProduct" class="form-label mb-0">Producto a buscar</label>
+            </div>
+            <div class="col-auto">
+              <input type="text" class="form-control" id="inputProduct" placeholder="Ingrese el producto">
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn" style="background-color: #B2C568; color: #fff;">Buscar</button>
+            </div>
+        </form>
+        
+        <div>
+          <button class="btn" type="button" style="background-color: #ECC199; color: #fff;">Regresar</button>
+        </div>
+    </div>
+</div>
+
+    <div class="table-container" id="tabla-productos">
+      <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th scope="col">codigo</th>
+              <th scope="col">nombre</th>
+              <th scope="col">precio unitario</th>
+              <th scope="col">categoria</th>
+              <th scope="col">descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Contenido de la tabla -->
+            
+          </tbody>
+      </table>
+  </div>  
+</main>
+{% endblock %}

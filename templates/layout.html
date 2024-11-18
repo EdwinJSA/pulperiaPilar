@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Bootstrap CSS v5.3.2 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!--SWEET ALERT-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  </head>
+<body>
+  <header> 
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" id="navbar">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('index') }}"><strong>El Pilar</strong></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main_nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main_nav">
+          <ul class="navbar-nav">
+            <!-- Ventas Dropdown - Primer Elemento -->
+            <li class="nav-item dropdown" id="myDropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Ventas</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('contado') }}">Contado</a></li>
+                <li>
+                  <a class="dropdown-item" href="#">Credito &raquo;</a>
+                  <ul class="submenu dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('credito') }}">Agregar Credito</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('abonarCredito') }}">Abonar Credito</a></li>
+                    <li>
+                    </li>
+                    <li><a class="dropdown-item" href="#">Ver creditos</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('productos') }}">Productos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Compras</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Descontados</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>    
+
+  </header>
+  
+
+  {% block content %}
+  {% endblock %}
+  
+  <!-- Bootstrap JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQ+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+  
+</body>
+</html>

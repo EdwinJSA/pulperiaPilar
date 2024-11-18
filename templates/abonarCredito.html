@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container">
+    <!-- Sección de búsqueda de cliente -->
+    <div class="search-container mb-4">
+        <h3>Buscar Cliente</h3>
+        <input type="text" id="cliente-id" class="form-control" placeholder="Buscar por ID del cliente" aria-label="Client ID">
+        <button type="button" class="btn mt-2" style="background-color: #B2C568; color: #fff;">Buscar Cliente</button>
+    </div>
+
+    <!-- Detalles del Cliente y Crédito -->
+    <div id="cliente-details" class="mb-4">
+        <h3>Detalles del Crédito</h3>
+        <div id="cliente-info" class="mb-3">
+            <!-- Detalles del Cliente (Ejemplo) -->
+            <p><strong>Nombre:</strong></p>
+            <p><strong>Apellido:</strong> </p>
+            <p><strong>ID:</strong></p>
+        </div>
+
+        <h4>Productos del Crédito</h4>
+        <ul id="productos-list" class="list-group mb-3">
+            <!-- Ejemplo de productos -->
+            <li class="list-group-item"></li>
+        </ul>
+
+        <div class="mb-3">
+            <label for="abono" class="form-label">Total del Credito</label>
+            <input type="number" class="form-control" id="totalCredito" value="" disabled>
+        </div>
+
+        <div class="mb-3">
+            <label for="monto-abonar" class="form-label">Monto a Abonar</label>
+            <input type="number" class="form-control" id="monto-abonar" placeholder="Ingrese el monto del abono">
+        </div>
+
+        <div class="mb-3">
+            <label for="fecha-abono" class="form-label">Fecha del Abono</label>
+            <input type="date" class="form-control" id="fecha-abono">
+        </div>
+
+        <button type="button" class="btn btn-success">Realizar Abono</button>
+    </div>
+</main>
+{% endblock %}

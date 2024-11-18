@@ -1,0 +1,129 @@
+/*background de index*/
+#inicioBackground{
+    height: 90vh;
+    background-image: url(../static/img/pilar.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Aplica los mismos estilos de fondo y borde a todos los botones */
+.btn {
+    background-color: #789342;
+    border-color: #fff;
+}
+
+/* Mantén los estilos al pasar el mouse */
+.btn:hover {
+    background-color: #B2C568;
+    border-color: #b5e05e;
+}
+
+/* Estilo para el navbar y enlaces de navegación */
+.nav-link:hover { 
+    background-color: #789342; 
+    color: white; 
+    font-size: large;
+}
+
+/* Otras reglas del diseño */
+.navbar.bg-primary {
+    background-color: #B2C568 !important;
+    color: white;
+}
+
+body {
+    background-color: #ECC199;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.cliente-container {
+    background-color: #ECC199;
+    padding: 15px;
+    border-radius: 8px;
+    color: #fff;
+}
+
+h3 {
+    color: #789342;
+}
+
+.card {
+    border-color: #B2C568;
+}
+
+.card h5 {
+    color: #ECC199;
+}
+
+.form-label {
+    color: #789342;
+}
+
+/* Resto de la estructura de la tabla y el diseño */
+.table {
+    color: #548D95;
+}
+
+.table thead {
+    background-color: #B2C568;
+    color: white;
+}
+
+.table-bordered th, .table-bordered td {
+    border-color: #B2C568;
+}
+
+.summary p {
+    font-weight: bold;
+    color: #789342;
+}
+
+.btn-cancelar {
+    background-color: #789342;
+    border-color: #fff;
+}
+
+.btn-cancelar:hover {
+    background-color: #B2C568;
+    border-color: #b5e05e;
+}
+
+.credito-label {
+    color: #548D95;
+    font-size: large;
+}
+
+/* Media queries para tamaños de pantalla */
+@media all and (min-width: 992px) {
+    .dropdown-menu li { position: relative; }
+    .nav-item .submenu { 
+        display: none;
+        position: absolute;
+        left: 100%; 
+        top: -7px;
+    }
+    .nav-item .submenu-left { 
+        right: 100%; 
+        left: auto;
+    }
+    .dropdown-menu > li:hover { background-color: #f1f1f1 }
+    .dropdown-menu > li:hover > .submenu { display: block; }
+}
+
+/* Media queries para dispositivos pequeños */
+@media (max-width: 991px) {
+    .dropdown-menu .dropdown-menu {
+        margin-left: 0.7rem; 
+        margin-right: 0.7rem; 
+        margin-bottom: .5rem;
+    }
+}
