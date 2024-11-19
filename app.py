@@ -33,6 +33,14 @@ def abonarCredito():
 def productos():
     return render_template('productos.html')
 
+@app.route('/compras')
+def compras():
+    return render_template('compras.html')
+
+@app.route('/verCredito')
+def verCredito():
+    return render_template('verCredito.html')
+
 @app.route('/guardarVenta', methods=['POST'])
 def guardar_producto():
     try:

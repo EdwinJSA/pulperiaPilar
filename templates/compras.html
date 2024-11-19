@@ -1,5 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
 
-
+<main class="container">
+    <div class="container" style="background-color: #B2C568;">
+        <div class="d-flex justify-content-between align-items-center mb-4" >
+            <form class="row g-2 align-items-center" style="background-color: #B2C568;">
+                <div class="col-auto">
+                  <label for="inputProduct" class="form-label mb-0 fw-bolder"  style = "color: #fff;">Producto a buscar</label>
+                </div>
+                <div class="col-auto">
+                  <input type="text" class="form-control" id="inputProduct" placeholder="Ingrese el producto">
+                </div>
+                <div class="col-auto">
+                  <button type="submit" class="btn" style="background-color: #B2C568; color: #fff;">Buscar</button>
+                </div>
+            </form>
+            
+            <div>
+              <button class="btn" type="button" style="background-color: #789342; color: #fff;">Regresar</button>
+            </div>
+        </div>
+    </div>
+    
+</main>
 {% endblock  %}
