@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 import json
 import traceback
 from sqlalchemy import create_engine, text
@@ -31,10 +31,17 @@ def abonarCredito():
 
 @app.route('/productos')
 def productos():
+    try:
+        query = text("SELECT * FROM Producto")
+        result = db.execute(query)
+        productos = result.fetchall()
+        return render_template('productos.html', productos=productos)
+    except Exception as e:
+        traceback.print_exc()
     return render_template('productos.html')
 
 @app.route('/compras')
-def compras():
+def compras():        
     return render_template('compras.html')
 
 @app.route('/verCredito')
@@ -71,6 +78,43 @@ def guardar_producto():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+@app.route('/actualizar_producto', methods=['POST'])
+def editar_producto():
+    try:
+        data = json.loads(request.data)
+        print(data.keys())
+        codigo = data['codigo']
+        nombre = data['nombre']
+        precio_unitario = data['precio']
+        cantidad = data['cantidad']
+        categoria = data['categoria']
+        descripcion = data['descripcion']
+        
+        print(codigo, nombre, precio_unitario, cantidad, categoria, descripcion)
+
+        query = text("UPDATE Producto SET nombre = :nombre, precio_unitario = :precio_unitario, cantidad = :cantidad, categoria = :categoria, descripcion = :descripcion WHERE codigo = :codigo")
+        db.execute(query, {'codigo': codigo, 'nombre': nombre, 'precio_unitario': precio_unitario, 'cantidad': cantidad, 'categoria': categoria, 'descripcion': descripcion})
+        db.commit()
+        return jsonify({'message': 'Producto actualizado correctamente'}), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/eliminar_producto/<int:id>', methods=['DELETE'])
+def eliminar_producto(id):
+    try:
+        print(f"Eliminando producto con ID: {id}")
+        query = text("DELETE FROM Producto WHERE codigo = :id")
+        db.execute(query, {'id': id})
+        db.commit()
+        return jsonify({'message': 'Producto eliminado correctamente'}), 200
+    except Exception as e:
+        print(f"Error al eliminar: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+
 
 
 if __name__ == '__main__':

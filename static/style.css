@@ -102,6 +102,10 @@ h3 {
     font-size: large;
 }
 
+.articulo > td {
+    height: 4rem;
+}
+
 /* Media queries para tamaños de pantalla */
 @media all and (min-width: 992px) {
     .dropdown-menu li { position: relative; }
