@@ -1,7 +1,7 @@
 /*background de index*/
 #inicioBackground{
     height: 90vh;
-    background-image: url(../static/img/pilar.png);
+    background-image: url(../static/img/pulperia.png);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -15,7 +15,7 @@
 
 /* Mantén los estilos al pasar el mouse */
 .btn:hover {
-    background-color: #B2C568;
+    background-color: #b5e05e;
     border-color: #b5e05e;
 }
 
