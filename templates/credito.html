@@ -2,47 +2,175 @@
 {% block content %}
 
 <main class="container">
-    <!-- Sección de Cliente -->
-    <div class="cliente-container mb-4">
-        <div class="d-flex justify-content-between mb-3">
-            <h3>Cliente</h3>
-        </div>
-        <div class="row">
-            <div class="col">
-                <input type="text" class="form-control" placeholder="Nombre del Cliente" aria-label="First name">
-            </div>
-            <div id="resultado-busqueda" class="mt-3"></div>
-        </div>
-    </div>
-
     <!-- Sección de Crédito -->
-    <h3>Agregar Crédito</h3>
-    <form id="credito-form">
-        <div class="mb-3">
-            <label for="producto" class="form-label">Producto</label>
-            <input type="text" class="form-control" id="producto" placeholder="Producto adquirido">
+    <div class="row">
+        <!-- Formulario de Crédito -->
+        <div class="col-12 col-md-6">
+            <h3>Agregar Crédito</h3>
+            <form id="credito-form" method="POST" action="/procesar_credito">
+                <div class="mb-3">
+                    <label for="fecha-credito" class="form-label">Fecha de Adquisición</label>
+                    <input type="date" class="form-control" id="fecha-credito" name="fecha_credito" readonly disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="nombreCliente" class="form-label">Cliente</label>
+                    <select name="cliente" id="nombreCliente" class="form-select">
+                        <option value="">Seleccione un cliente</option>
+                        {% for i in clientes %}
+                            <option value="{{ i[0] }}">{{ i[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3 position-relative">
+                    <label for="cicloInput" class="form-label">Producto</label>
+                    <input type="text" id="cicloInput" class="form-control" placeholder="Escribe para buscar..." autocomplete="off">
+                    <ul id="suggestions" class="list-group mt-1" style="position: absolute; z-index: 1000; display: none;"></ul>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="cantidad" class="form-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad" placeholder="Cantidad" name="cantidad" min="1">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="add-credit-button">Añadir Crédito</button>
+            </form>
         </div>
-        <div class="row">
-            <div class="col">
-                <label for="cantidad" class="form-label">Cantidad</label>
-                <input type="number" class="form-control" id="cantidad" placeholder="Cantidad" min="1">
+
+        <!-- Detalles de Crédito -->
+        <div class="col-12 col-md-6">
+            <h3>Detalles de Crédito</h3>
+            <div class="mb-3">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Aquí se añadirán dinámicamente los datos -->
+                    </tbody>
+                </table>
             </div>
-            <div class="col">
-                <label for="precio-unitario" class="form-label">Precio Unitario</label>
-                <input type="number" class="form-control" id="precio-unitario" placeholder="Precio Unitario" step="0.01">
-            </div>
         </div>
-        <div class="mb-3">
-            <label for="total-credito" class="form-label">Total de Crédito</label>
-            <input type="number" class="form-control" id="total-credito" placeholder="Total del Crédito" step="0.01" readonly>
-        </div>
-        <div class="mb-3">
-            <label for="fecha-credito" class="form-label">Fecha de Adquisición</label>
-            <input type="date" class="form-control" id="fecha-credito">
-        </div>
-        <button type="button" class="btn btn-cancelar" onclick="">Añadir Crédito</button>
-    </form>
+
+        <button type="button" class="btn btn-success d-none" id="btn-guardarCredito">Guardar Credito</button>
+    </div>
 </main>
+
+<script>
+    const options = {{ producto | safe }};
+    const input = document.getElementById("cicloInput");
+    const suggestions = document.getElementById("suggestions");
+    const tableBody = document.querySelector("table tbody");
+    const addButton = document.getElementById("add-credit-button");
+    const totalCredito = document.getElementById("credito-total");
+    const guardarCredito = document.getElementById("btn-guardarCredito");
+    const listaProductos = [];
+    const inputNameCustomer = document.getElementById("nombreCliente");
+
+    input.addEventListener("input", () => {
+        const query = input.value.toLowerCase();
+        suggestions.innerHTML = "";
+        suggestions.style.display = "none";
+
+        if (query) {
+            const matches = options.filter(option =>
+                option.toLowerCase().includes(query)
+            );
+
+            if (matches.length) {
+                matches.forEach(match => {
+                    const li = document.createElement("li");
+                    li.textContent = match;
+                    li.className = "list-group-item list-group-item-action";
+                    li.addEventListener("click", () => {
+                        input.value = match;
+                        suggestions.style.display = "none";
+                    });
+                    suggestions.appendChild(li);
+                });
+                suggestions.style.display = "block";
+            }
+        }
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!suggestions.contains(e.target) && e.target !== input) {
+            suggestions.style.display = "none";
+        }
+    });
+
+    const fechaInput = document.getElementById("fecha-credito");
+    const hoy = new Date();
+    const fechaActual = hoy.toISOString().split("T")[0];
+    fechaInput.value = fechaActual;
+
+    addButton.addEventListener("click", () => {
+        const product = input.value;
+        const quantity = document.getElementById("cantidad").value;
+        
+        inputNameCustomer.disabled = true;
+        guardarCredito.classList.remove("d-none");
+
+        if (product && quantity) {
+            const isValidProduct = options.includes(product);
+            if (!isValidProduct) {
+                alert("Por favor, seleccione un producto válido.");
+                return;
+            }
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${product}</td>
+                <td>${quantity}</td>
+            `;
+            tableBody.appendChild(row);
+
+            listaProductos.push({ producto: product, cantidad: quantity });
+
+            input.value = "";
+            document.getElementById("cantidad").value = "";
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Por favor, complete todos los campos.'
+            })
+        }
+    });
+
+    guardarCredito.addEventListener("click", () => {
+        fetch('/guardarCredito', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                'cliente': document.getElementById("nombreCliente").value,
+                'productos': listaProductos
+            })
+        }).then(data => {
+                Swal.fire({
+                    title: 'Exito!',
+                    text: 'Credito guardado con exito',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar'
+                })
+            })
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: error,
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+        });
+
+</script>
 
 <script
     src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
@@ -56,4 +184,4 @@
     crossorigin="anonymous"
 ></script>
 
-{% endblock  %}
+{% endblock %}

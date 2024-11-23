@@ -1,12 +1,12 @@
 // import Swal from 'sweetalert2'
 let datos = [];
+let clientes = [];
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length == 2) return parts.pop().split(';').shift();
 }
-
 
 document.addEventListener("DOMContentLoaded", function () {
   // make it as accordion for smaller screens
@@ -288,5 +288,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
-
-

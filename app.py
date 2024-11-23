@@ -3,11 +3,20 @@ import json
 import traceback
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-import pyodbc
+import pyodbc, re
 
 app = Flask(__name__)
 
 db = sessionmaker(bind=create_engine('sqlite:///database.db'))()
+
+
+def obtener_codigo(texto):
+    # Busca todo lo que está antes del primer guion
+    match = re.match(r"^[^-]+", texto)
+    if match:
+        return match.group(0)
+    else:
+        return None
 
 @app.route('/')
 def index():
@@ -15,7 +24,20 @@ def index():
 
 @app.route('/credito')
 def credito():
-    return render_template('credito.html')
+    nombreProductos = []
+    
+    query = text("SELECT * FROM Cliente")
+    clientes = db.execute(query).fetchall()
+    
+    query = text("SELECT codigo,nombre, descripcion, precio_unitario FROM Producto")
+    produc = db.execute(query).fetchall()
+    
+    print("====================================")
+    for i in produc:
+        nombreProductos.append(f"{i[0]}-{i[1]}-{i[2]}-C${i[3]}")    
+    
+    return render_template('credito.html', clientes=clientes, producto=json.dumps(nombreProductos))
+
 
 @app.route('/actCredito')
 def actCredito():
@@ -53,6 +75,7 @@ def agregarCliente():
             print("Error al agregar cliente:", e)
             return render_template('agregarCliente.html', boucher=False, error="Error al guardar el cliente.")
     else:
+        print("NO ENTRO AL IF")
         return render_template('agregarCliente.html')
 
 
@@ -141,13 +164,101 @@ def eliminar_producto(id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/cargarClientes')
+@app.route('/cargarClientes', methods=['POST', 'GET'])
 def cargarClientes():
-    busqueda = request.args.get('busqueda', '')  # Obtener el parámetro de búsqueda
-    query = text("SELECT * FROM Cliente WHERE nombres LIKE :busqueda")  # Corregir la consulta
-    result = db.execute(query, {'busqueda': f'%{busqueda}%'})  # Incluir comodines
-    clientes = [dict(row) for row in result.fetchall()]  # Convertir resultados a diccionario
-    return jsonify(clientes)  # Devolver en formato JSON
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        
+        query = text("SELECT * FROM Cliente WHERE nombres = :nombres")
+        result = db.execute(query, {'nombres': nombre})
+        clientes = result.fetchall()
+        print(clientes)
+        return render_template('credito.html', clientes=clientes)
+    
+@app.route('/guardarCredito', methods=['POST'])
+def guardarCredito():
+    try:
+        data = request.get_json()
+        print(data)
+        cliente = data['cliente']
+        productos = data['productos']
+        
+        # Iniciamos la transacción
+        db.begin()
+
+        # Creamos un nuevo crédito al cliente
+        query = text("INSERT INTO Credito (id_cliente) VALUES (:id_cliente)")
+        db.execute(query, {'id_cliente': cliente})
+        
+        # Obtenemos el id del crédito
+        query = text("SELECT id FROM Credito ORDER BY id DESC LIMIT 1")
+        result = db.execute(query)
+        id_credito = result.fetchone()[0]
+        print(f"Credito ID: {id_credito}")
+        
+        # Validar que hay suficiente stock
+        for i in productos:
+            producto = obtener_codigo(i['producto'])
+            cantidad = i['cantidad']
+            query = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query, {'codigo': producto})
+            stock = result.fetchone()[0]
+            print(f"Producto: {producto}, Stock: {stock}, Cantidad requerida: {cantidad}")
+            if stock < cantidad:
+                db.rollback()  # Rollback en caso de error
+                return jsonify({'error': f'No hay suficiente stock para el producto {producto}'}), 400
+        
+        # Insertamos los detalles del crédito
+        for i in productos:
+            producto = obtener_codigo(i['producto'])
+            cantidad = i['cantidad']
+            
+            # Insertamos el detalle del crédito
+            query = text("INSERT INTO DetalleCredito (cantidad, codigo_producto, id_credito) VALUES (:cantidad, :codigo_producto, :id_credito)")
+            db.execute(query, {'cantidad': cantidad, 'codigo_producto': producto, 'id_credito': id_credito})
+        
+        # Commit después de insertar todos los detalles
+        db.commit()
+        
+        # Total a Pagar
+        query = text("""
+                    SELECT SUM(dc.cantidad * p.precio_unitario) AS total_a_pagar
+                    FROM DetalleCredito dc
+                    JOIN Producto p ON dc.codigo_producto = p.codigo
+                    JOIN Credito c ON dc.id_credito = c.id
+                    WHERE c.id = :id_credito;
+                    """)
+        result = db.execute(query, {'id_credito': id_credito})
+        total_a_pagar = result.fetchone()[0]
+        print(f"Total a pagar: {total_a_pagar}")
+        
+        # Actualizamos el total del crédito
+        query = text("SELECT monto_pagado FROM Credito WHERE id = :id_credito")
+        result = db.execute(query, {'id_credito': id_credito})
+        monto_pagado = result.fetchone()[0]
+        
+        query = text("UPDATE Credito SET total = :total_a_pagar, monto_pendiente = :pendiente WHERE id = :id_credito")
+        db.execute(query, {'total_a_pagar': total_a_pagar, 'pendiente': total_a_pagar - monto_pagado, 'id_credito': id_credito})
+        
+        # Actualizamos la cantidad de productos en stock
+        for i in productos:
+            producto = obtener_codigo(i['producto'])
+            cantidad = i['cantidad']
+            query = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query, {'codigo': producto})
+            stock = result.fetchone()[0]
+            
+            query = text("UPDATE Producto SET cantidad = :cantidad WHERE codigo = :codigo")
+            db.execute(query, {'cantidad': stock - cantidad, 'codigo': producto})
+        
+        # Commit final
+        db.commit()
+        
+        return jsonify({'message': 'Credito guardado correctamente'}), 200
+    except Exception as e:
+        db.rollback()  # Aseguramos que todo se revierta en caso de error
+        return jsonify({'error': str(e)}), 500
+
 
 
 if __name__ == '__main__':
