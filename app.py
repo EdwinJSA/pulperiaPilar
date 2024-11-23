@@ -75,6 +75,18 @@ def compras():
 def verCredito():
     return render_template('verCredito.html')
 
+@app.route('/clientes')
+def clientes():
+    try:
+        query = text("SELECT * FROM Cliente")
+        result = db.execute(query)
+        clientes = result.fetchall()
+        return render_template('clientes.html', clientes=clientes)
+    except Exception as e:
+        traceback.print_exc()
+        return render_template('clientes.html')
+
+
 @app.route('/guardarVenta', methods=['POST'])
 def guardar_producto():
     try:
@@ -99,7 +111,7 @@ def guardar_producto():
             query = text("INSERT INTO DetalleContado(cantidad, codigo_producto, id_contado) VALUES (:cantidad, :codigo_producto, :id_contado)")
             db.execute(query, {'cantidad': producto['quantity'], 'codigo_producto': producto['name'], 'id_contado': id_venta})
             db.commit()
-
+#articulo
 
         return jsonify({'message': 'Producto guardado correctamente'}), 200
     except Exception as e:
@@ -148,6 +160,17 @@ def cargarClientes():
     result = db.execute(query, {'busqueda': f'%{busqueda}%'})  # Incluir comodines
     clientes = [dict(row) for row in result.fetchall()]  # Convertir resultados a diccionario
     return jsonify(clientes)  # Devolver en formato JSON
+
+@app.route('/proveedores')
+def proveedores():
+    try:
+        query = text("SELECT * FROM Proveedor")
+        result = db.execute(query)
+        proveedores = result.fetchall()
+        return render_template('proveedores.html', proveedores=proveedores)
+    except Exception as e:
+        traceback.print_exc()
+    return render_template('proveedores.html')
 
 
 if __name__ == '__main__':

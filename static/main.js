@@ -288,5 +288,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+//busqueda de clientes
+document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('keyup', e => {
+    if (e.target.matches("#inputClient")) {
+      if (e.key === 'Escape') e.target.value = '';
+      document.querySelectorAll('.us_cliente').forEach(cliente => {
+        cliente.textContent.toLowerCase().includes(e.target.value.toLowerCase())
+          ? cliente.classList.remove('d-none')
+          : cliente.classList.add('d-none');
+      });
+    }
+  });
+});
+
+//busqueda de proveedores
+document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('keyup', e => {
+    if (e.target.matches("#inputProvider")) {
+      if (e.key === 'Escape') e.target.value = '';
+      document.querySelectorAll('.us_proveedor').forEach(proveedor => {
+        proveedor.textContent.toLowerCase().includes(e.target.value.toLowerCase())
+          ? proveedor.classList.remove('d-none')
+          : proveedor.classList.add('d-none');
+      });
+    }
+  });
+});
+
+
+
 
 
