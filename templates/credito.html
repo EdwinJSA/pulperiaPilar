@@ -6,17 +6,12 @@
     <div class="cliente-container mb-4">
         <div class="d-flex justify-content-between mb-3">
             <h3>Cliente</h3>
-            <div class="summary">
-                <p>ID Cliente: <span id="id-cliente"></span></p>
-            </div>
         </div>
         <div class="row">
             <div class="col">
-                <input type="text" class="form-control" placeholder="Nombre" aria-label="First name">
+                <input type="text" class="form-control" placeholder="Nombre del Cliente" aria-label="First name">
             </div>
-            <div class="col">
-                <input type="text" class="form-control" placeholder="Apellido" aria-label="Last name">
-            </div>
+            <div id="resultado-busqueda" class="mt-3"></div>
         </div>
     </div>
 
@@ -45,7 +40,7 @@
             <label for="fecha-credito" class="form-label">Fecha de Adquisición</label>
             <input type="date" class="form-control" id="fecha-credito">
         </div>
-        <button type="button" class="btn btn-cancelar" onclick="cancelarCredito()">Añadir Crédito</button>
+        <button type="button" class="btn btn-cancelar" onclick="">Añadir Crédito</button>
     </form>
 </main>
 

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<main class="container">
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Cliente</h3>
+    </div>
+    <form class="row" methods="POST" action="/agregarCliente">
+        <div class="col">
+            <input type="text" class="form-control" placeholder="Nombre" aria-label="First name" name="nombre">
+        </div>
+        <div class="col">
+            <input type="text" class="form-control" placeholder="Apellido" aria-label="Last name" name="apellido">
+        </div>
+        <div class="col">
+            <input type="text" class="form-control" placeholder="Celular" aria-label="cellphone" name="celular">
+        </div>
+        <div class="col">
+            <button type="submit" class="btn" style="background-color: #B2C568; color: #fff;">Agregar Cliente</button>
+        </div>
+    </form>
+
+
+    {% if boucher %}
+    <div class="boucher">
+        <div class="confirmacion">
+            <span>Cliente agregado con exito</span>
+            <div class="datosCliente">
+                <p>id Cliente: {{ datos.id }}</p>
+                <p>nombre: {{ datos.nombres }}</p>
+                <p>apellido: {{ datos.apellidos }}</p>
+                <p>celular: {{ datos.telefono }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+</main>
+
+{% endblock content %}

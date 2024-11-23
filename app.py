@@ -28,6 +28,33 @@ def contado():
 @app.route('/abonarCredito')
 def abonarCredito():
     return render_template('abonarCredito.html')
+@app.route('/agregarCliente', methods=['POST', 'GET'])
+def agregarCliente():
+    if request.method == 'POST':
+        try:
+            # Obtener datos del formulario
+            nombre = request.form['nombre']
+            apellido = request.form['apellido']
+            celular = request.form['celular']
+
+            # Insertar en la base de datos
+            query_insert = text("INSERT INTO Cliente (nombres, apellidos, telefono) VALUES (:nombre, :apellido, :celular)")
+            db.execute(query_insert, {'nombre': nombre, 'apellido': apellido, 'celular': celular})
+            db.commit()
+
+            # Obtener el último cliente agregado
+            query_select = text("SELECT * FROM Cliente ORDER BY id DESC LIMIT 1")
+            result = db.execute(query_select).fetchone()  # Trae solo una fila como diccionario
+
+            # Mostrar datos del cliente agregado
+            return render_template('agregarCliente.html', boucher=True, datos=result)
+
+        except Exception as e:
+            print("Error al agregar cliente:", e)
+            return render_template('agregarCliente.html', boucher=False, error="Error al guardar el cliente.")
+    else:
+        return render_template('agregarCliente.html')
+
 
 @app.route('/productos')
 def productos():
@@ -114,7 +141,13 @@ def eliminar_producto(id):
         return jsonify({'error': str(e)}), 500
 
 
-
+@app.route('/cargarClientes')
+def cargarClientes():
+    busqueda = request.args.get('busqueda', '')  # Obtener el parámetro de búsqueda
+    query = text("SELECT * FROM Cliente WHERE nombres LIKE :busqueda")  # Corregir la consulta
+    result = db.execute(query, {'busqueda': f'%{busqueda}%'})  # Incluir comodines
+    clientes = [dict(row) for row in result.fetchall()]  # Convertir resultados a diccionario
+    return jsonify(clientes)  # Devolver en formato JSON
 
 
 if __name__ == '__main__':
