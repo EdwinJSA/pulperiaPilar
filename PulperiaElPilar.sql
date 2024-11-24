@@ -59,7 +59,7 @@ CREATE TABLE DetalleCompra
 )
 GO
 
-CREATE TABLE Dañado
+CREATE TABLE Daï¿½ado
 (
 	id INT IDENTITY(1,1) PRIMARY KEY,
 	descripcion NVARCHAR(80),
@@ -68,19 +68,19 @@ CREATE TABLE Dañado
 )
 GO
 
-CREATE TABLE DetalleDañado
+CREATE TABLE DetalleDaï¿½ado
 (
 	codigo_detalle INT IDENTITY(1,1) PRIMARY KEY,
 	cantidad INT NOT NULL,
 	estado_devolucion BIT DEFAULT 0,
 	codigo_producto NVARCHAR(20),
-	id_dañado INT,
+	id_daï¿½ado INT,
 	CONSTRAINT fk_codigo_productoDD FOREIGN KEY(codigo_producto) REFERENCES Producto(codigo),
-	CONSTRAINT fk_dañado_id FOREIGN KEY(id_dañado) REFERENCES Dañado(id)
+	CONSTRAINT fk_daï¿½ado_id FOREIGN KEY(id_daï¿½ado) REFERENCES Daï¿½ado(id)
 )
 GO
 
---drop table DetalleDañado
+--drop table DetalleDaï¿½ado
 
 CREATE TABLE Consumido
 (
@@ -146,12 +146,12 @@ GO
 
 /*----- FIN DE LAS TABLAS -----*/
 
-/*Insertar datos NESTLÉ*/
+/*Insertar datos NESTLï¿½*/
 INSERT INTO Producto (codigo, nombre,precio_unitario,cantidad,categoria,descripcion)
-VALUES ('12552024', 'PRESTO CAFE STICK 60X(80X1.8G)', 167.83, 2, 'Bebida', 'Café presto instantáneo en presentación de sticks'),
+VALUES ('12552024', 'PRESTO CAFE STICK 60X(80X1.8G)', 167.83, 2, 'Bebida', 'Cafï¿½ presto instantï¿½neo en presentaciï¿½n de sticks'),
 ('12537279', 'MAGGI SOPA POLLO FIDEO 12X(12X55G)', 128.69, 2, 'Alimento', 'Sopa de fideo sabor pollo'),
 ('11296100', 'MAGGI SOPA CRI COSTILLA 12X(12X55G)', 125.65, 1, 'Alimentos', 'Sopa criolla sabor costilla'),
-('12552068', 'NESCAFE CLASICO STICK 30X(20X1.8G)', 48.70, 1, 'Bebida', 'Café Nescafe clásico en sticks'),
+('12552068', 'NESCAFE CLASICO STICK 30X(20X1.8G)', 48.70, 1, 'Bebida', 'Cafï¿½ Nescafe clï¿½sico en sticks'),
 ('12585873', 'MAGGI CONSOME POLLO TIRA 40(14X10G)', 42.55, 2, 'Condimento', 'Sazonador de pollo en tiras'),
 ('12089991', 'MAGGI SAZ COSTILLA RES TIRA 40X(12X10G)', 37.03, 2, 'Condimento', 'Sazonador sabor costilla de res'),
 ('12588460', 'MAGGI SABORYCOLORCURCUMA40(12X10G)', 35.70, 2, 'Condimento', 'Sazonador sabor y color');
@@ -184,6 +184,6 @@ ALTER COLUMN nombre NVARCHAR(50)
 
 EXEC sp_help 'Producto';
 
-SELECT * FROM Producto;
+SELECT * FROM Cliente;
 
 /*----- FIN DE LAS CONSULTAS -----*/

@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container mt-4" style="background-color: #d1dd94; padding: 20px; border-radius: 8px; margin-top: 20px;">
+    <form id="form-consumido" method="POST" action="javascript:void(0)">
+        <div class="d-flex justify-content-between mb-3">
+            <p>ID: <span id="consumido-id">---</span></p> <!-- Aquí se mostrará el ID del consumo -->
+            <p>Total del consumo: C$<span id="total-consumido">0.00</span></p>
+        </div>
+
+        <div class="mb-3">
+            <label for="fecha-consumido" class="form-label">Fecha de Adquisición</label>
+            <input type="date" class="form-control" id="fecha-consumido" name="fecha_consumido" readonly>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <label for="cicloInputConsumido" class="form-label">Producto</label>
+                <input type="text" id="cicloInputConsumido" class="form-control" placeholder="Escribe para buscar..." autocomplete="off">
+                <ul id="suggestions" class="list-group mt-1" style="position: absolute; z-index: 1000; display: none;"></ul>
+            </div>
+            <div class="col">
+                <label for="cantidadConusmido" class="form-label">Cantidad</label>
+                <input type="number" class="form-control" id="cantidadConusmido" placeholder="Cantidad" name="cantidadConsumido" min="1">
+            </div>
+        </div>
+
+        <button type="button" class="btn" id="add-consumido-button" style="background-color: #B2C568; color: #fff;">Añadir Producto</button>
+
+        <div class="mb-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Producto</th>
+                        <th scope="col">Cantidad</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Aquí se añadirán dinámicamente los datos -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Este es el botón de guardar que será visible una vez se añadan productos -->
+        <button type="button" class="btn btn-success d-none" id="btn-guardarConsumido" style="margin-top: 20px;">Guardar</button>
+    </form>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const options = {{ producto | safe }};
+    const input = document.getElementById("cicloInputConsumido");
+    const suggestions = document.getElementById("suggestions");
+    const tableBody = document.getElementById("table-body");
+    const addButton = document.getElementById("add-consumido-button");
+    const totalConsumidoElem = document.getElementById("total-consumido");
+    const form = document.getElementById("form-consumido");
+    const consumidoIdElem = document.getElementById("consumido-id");  // Elemento donde se mostrará el ID
+    let totalConsumido = 0;
+    let productos = [];
+
+    input.addEventListener("input", () => {
+        const query = input.value.toLowerCase();
+        suggestions.innerHTML = "";
+        suggestions.style.display = "none";
+
+        if (query) {
+            const matches = options.filter(option => option.toLowerCase().includes(query));
+
+            if (matches.length) {
+                matches.forEach(match => {
+                    const li = document.createElement("li");
+                    li.textContent = match;
+                    li.className = "list-group-item list-group-item-action";
+                    li.addEventListener("click", () => {
+                        input.value = match;
+                        suggestions.style.display = "none";
+                    });
+                    suggestions.appendChild(li);
+                });
+                suggestions.style.display = "block";
+            }
+        }
+    });
+
+    addButton.addEventListener("click", () => {
+        const product = input.value;
+        const quantity = parseInt(document.getElementById("cantidadConusmido").value, 10);
+
+        if (product && quantity > 0) {
+            const [codigo, nombre, precioText] = product.split("-");
+            const precio = parseFloat(precioText.replace("C$", ""));
+
+            const totalProducto = precio * quantity;
+            totalConsumido += totalProducto;
+
+            // Crear fila de producto en tabla
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${nombre}</td>
+                <td>${quantity}</td>
+                <td>C$${totalProducto.toFixed(2)}</td>
+            `;
+            tableBody.appendChild(row);
+
+            // Actualizar total de consumo
+            totalConsumidoElem.textContent = totalConsumido.toFixed(2);
+
+            // Limpiar campos
+            input.value = "";
+            document.getElementById("cantidadConusmido").value = "";
+
+            // Agregar producto a la lista de productos
+            productos.push({ codigo, nombre, precio, cantidad: quantity });
+
+            // Mostrar botón guardar si hay productos
+            document.getElementById("btn-guardarConsumido").classList.remove("d-none");
+        } else {
+            alert("Por favor, complete todos los campos correctamente.");
+        }
+    });
+    document.getElementById("btn-guardarConsumido").addEventListener("click", () => {
+        const fecha_consumido = document.getElementById("fecha-consumido").value;
+    
+        // Enviar los datos al backend con fetch
+        fetch("/guardar_consumido", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                fecha_registro: fecha_consumido,
+                productos: productos
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                // Mostrar SweetAlert de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Consumo guardado!',
+                    text: 'El consumo se ha guardado correctamente.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Mostrar el ID del consumo guardado
+                    consumidoIdElem.textContent = data.id_consumido; // Actualizamos el ID en la página
+    
+                    // Limpiar tabla y datos
+                    productos = [];
+                    totalConsumido = 0;
+                    tableBody.innerHTML = '';
+                    totalConsumidoElem.textContent = '0.00';
+                    document.getElementById("btn-guardarConsumido").classList.add("d-none");
+                });
+            } else {
+                // Mostrar SweetAlert de error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al guardar',
+                    text: data.error,
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al guardar',
+                text: 'Hubo un error al intentar guardar el consumo.',
+                confirmButtonText: 'OK'
+            });
+        });
+    });
+    
+    // Establecer la fecha de hoy en el input
+    const fechaInput = document.getElementById("fecha-consumido");
+    const hoy = new Date();
+    const fechaActual = hoy.toISOString().split("T")[0];
+    fechaInput.value = fechaActual;
+</script>
+
+{% endblock  %}

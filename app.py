@@ -284,5 +284,93 @@ def proveedores():
     return render_template('proveedores.html')
 
 
+@app.route('/consumido')
+def consumido():
+    nombreProductos = []
+    
+    # Query para obtener el código, nombre y precio_unitario del producto
+    query = text("SELECT codigo, nombre, precio_unitario FROM Producto")
+    produc = db.execute(query).fetchall()
+    
+    # Formatear cada producto en una cadena específica para el autocompletado
+    for i in produc:
+        nombreProductos.append(f"{i[0]}-{i[1]}-C${i[2]}")  # Código-Nombre-Precio
+
+    return render_template('consumido.html', producto=json.dumps(nombreProductos))
+
+# Endpoint para guardar el consumo
+@app.route('/guardar_consumido', methods=['POST'])
+def guardar_consumido():
+    try:
+        # Obtener los datos enviados en formato JSON
+        data = request.get_json()
+        fecha_registro = data['fecha_registro']
+        productos = data['productos']
+        
+        # Iniciar la transacción
+        db.begin()
+
+        # Crear el nuevo registro en la tabla `Consumido`
+        query_consumido = text("INSERT INTO Consumido (fecha_registro, total) VALUES (:fecha_registro, :total)")
+        total_consumo = sum([p['precio'] * p['cantidad'] for p in productos])  # Calcular total
+        db.execute(query_consumido, {'fecha_registro': fecha_registro, 'total': total_consumo})
+        
+        # Obtener el ID del consumo recién insertado
+        query_consumido = text("INSERT INTO Consumido (fecha_registro, total) VALUES (:fecha_registro, :total) RETURNING id")
+        result = db.execute(query_consumido, {'fecha_registro': fecha_registro, 'total': total_consumo})
+        id_consumido = result.fetchone()[0]
+
+        
+        # Validar el stock de cada producto
+        for prod in productos:
+            producto_codigo = prod['codigo']
+            cantidad = prod['cantidad']
+            
+            # Consultar el stock actual del producto
+            query_stock = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query_stock, {'codigo': producto_codigo})
+            stock = result.fetchone()[0]
+            
+            # Si no hay suficiente stock, hacer rollback y devolver mensaje de error
+            if stock < cantidad:
+                db.rollback()  # Deshacer todo si hay error
+                return jsonify({'error': f'No hay suficiente stock para el producto {producto_codigo}'}), 400
+        
+        for prod in productos:
+            producto_codigo = prod['codigo']
+            cantidad = prod['cantidad']
+            
+            query_detalle = text("""
+                INSERT INTO DetalleConsumido (cantidad, codigo_producto, id_consumido)
+                VALUES (:cantidad, :codigo_producto, :id_consumido)
+            """)
+            db.execute(query_detalle, {'cantidad': cantidad, 'codigo_producto': producto_codigo, 'id_consumido': id_consumido})
+        
+        db.commit()
+
+        # Actualizar el stock de los productos después del consumo
+        for prod in productos:
+            producto_codigo = prod['codigo']
+            cantidad = prod['cantidad']
+            
+            # Consultar el stock actual del producto
+            query_stock = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query_stock, {'codigo': producto_codigo})
+            stock = result.fetchone()[0]
+            
+            # Actualizar el stock del producto
+            query_update_stock = text("UPDATE Producto SET cantidad = :cantidad WHERE codigo = :codigo")
+            db.execute(query_update_stock, {'cantidad': stock - cantidad, 'codigo': producto_codigo})
+
+        db.commit()
+        
+        return jsonify({'message': 'Consumo guardado correctamente', 'id_consumido': id_consumido}), 200
+    
+    except Exception as e:
+        db.rollback()  
+        return jsonify({'error': str(e)}), 500
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
