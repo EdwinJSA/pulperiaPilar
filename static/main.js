@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 // DOMContentLoaded  end
 
-window.onload = () => {
+/*window.onload = () => {
   let pagaTotal = 0;
   let listaProductos = [];
 
@@ -144,7 +144,7 @@ window.onload = () => {
     }
 
   });
-};
+};*/
 
 document.addEventListener('DOMContentLoaded', function () {
   // Código del script main.js o producto.js
@@ -315,6 +315,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('keyup', e => {
+    if (e.target.matches("#inputClientCredito")) {
+      if (e.key === 'Escape') e.target.value = '';
+      document.querySelectorAll('.tabla_credito').forEach(cliente => {
+        cliente.textContent.toLowerCase().includes(e.target.value.toLowerCase())
+          ? cliente.classList.remove('d-none')
+          : cliente.classList.add('d-none');
+      });
+    }
+  });
+});
+
 
 
 

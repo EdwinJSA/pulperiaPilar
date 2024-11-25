@@ -38,14 +38,19 @@ def credito():
     
     return render_template('credito.html', clientes=clientes, producto=json.dumps(nombreProductos))
 
-
-@app.route('/actCredito')
-def actCredito():
-    return render_template('actCredito.html')
-
 @app.route('/contado')
 def contado():
-    return render_template('contado.html')
+    nombreProductos = []
+    
+    # Query para obtener el código, nombre y precio_unitario del producto
+    query = text("SELECT codigo, nombre, precio_unitario FROM Producto")
+    produc = db.execute(query).fetchall()
+    
+    # Formatear cada producto en una cadena específica para el autocompletado
+    for i in produc:
+        nombreProductos.append(f"{i[0]}-{i[1]}-C${i[2]}")  # Código-Nombre-Precio
+
+    return render_template('contado.html', producto=json.dumps(nombreProductos))
 
 @app.route('/abonarCredito')
 def abonarCredito():
@@ -94,9 +99,27 @@ def productos():
 def compras():        
     return render_template('compras.html')
 
+@app.route('/danado')
+def danado():        
+    return render_template('danado.html')
+
+
 @app.route('/verCredito')
 def verCredito():
-    return render_template('verCredito.html')
+    try:
+        # Consulta corregida
+        query = text("""
+            SELECT cliente.id, cliente.nombres, cliente.apellidos, cliente.telefono,
+                credito.fecha_credito, credito.monto_pendiente, credito.total
+            FROM cliente
+            JOIN credito ON cliente.id = credito.id_cliente
+        """)
+        result = db.execute(query)
+        verCredito = result.fetchall()
+        return render_template('verCredito.html', verCredito=verCredito)
+    except Exception as e:
+        traceback.print_exc()
+        return render_template('verCredito.html')
 
 @app.route('/clientes')
 def clientes():

@@ -15,17 +15,14 @@
 <div class="card p-3 mb-3">
     <div class="row">
         <form id="product-form">
-            <div class="col-md-6">
-                <label for="product-name" class="form-label">Producto</label>
-                <input type="text" class="form-control" id="product-name" placeholder="Ingresa el nombre del producto">
+            <div class="mb-3 position-relative">
+                <label for="productoContado" class="form-label">Producto</label>
+                <input type="text" id="productoContado" class="form-control" placeholder="Escribe para buscar..." autocomplete="off">
+                <ul id="suggestions" class="list-group mt-1" style="position: absolute; z-index: 1000; display: none;"></ul>
             </div>
             <div class="col-md-3">
                 <label for="product-quantity" class="form-label">Cantidad</label>
                 <input type="number" class="form-control" id="product-quantity" placeholder="Cantidad" min="1">
-            </div>
-            <div class="col-md-3">
-                <label for="product-price" class="form-label">Precio Unitario</label>
-                <input type="number" class="form-control" id="product-price" placeholder="Precio" min="0" step="0.01">
             </div>
             <button class="btn mt-3" id="agregar" type="button" style="background-color: #B2C568; color: #fff;">Agregar Producto</button>
         </form>
@@ -59,5 +56,128 @@
         <button class="btn btn-success">Guardar Venta</button>
     </div>
 </main>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const productos = {{ producto|safe }};  // Recibe los productos del backend en formato JSON
+        const inputProducto = document.getElementById("productoContado");
+        const inputCantidad = document.getElementById("product-quantity");
+        const suggestions = document.getElementById("suggestions");
+        const productTableBody = document.getElementById("product-table-body");
+        const totalPurchase = document.getElementById("total-purchase");
+        let totalVenta = 0;
+        let productosSeleccionados = [];
+
+        // Mostrar sugerencias de productos al escribir
+        inputProducto.addEventListener("input", function () {
+            const query = this.value.toLowerCase();
+            suggestions.innerHTML = "";
+            if (query.length > 0) {
+                productos.forEach((producto) => {
+                    if (producto.toLowerCase().includes(query)) {
+                        const suggestionItem = document.createElement("li");
+                        suggestionItem.classList.add("list-group-item", "list-group-item-action");
+                        suggestionItem.textContent = producto;
+                        suggestions.appendChild(suggestionItem);
+                        suggestions.style.display = "block";
+
+                        // Agregar el producto al campo de entrada al hacer clic
+                        suggestionItem.addEventListener("click", function () {
+                            inputProducto.value = producto;
+                            suggestions.style.display = "none";
+                        });
+                    }
+                });
+            } else {
+                suggestions.style.display = "none";
+            }
+        });
+
+        // Agregar producto a la lista de compra
+        document.getElementById("agregar").addEventListener("click", function () {
+            const productoInfo = inputProducto.value.split("-");
+            const codigoProducto = productoInfo[0];
+            const nombreProducto = productoInfo[1];
+            const precioProducto = parseFloat(productoInfo[2].replace("C$", ""));
+            const cantidad = parseInt(inputCantidad.value);
+            const totalProducto = precioProducto * cantidad;
+
+            if (nombreProducto && cantidad > 0) {
+                // Agregar producto a la tabla
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${nombreProducto}</td>
+                    <td>${cantidad}</td>
+                    <td>C$${precioProducto.toFixed(2)}</td>
+                    <td>C$${totalProducto.toFixed(2)}</td>
+                `;
+                productTableBody.appendChild(row);
+
+                // Actualizar total de venta
+                totalVenta += totalProducto;
+                totalPurchase.textContent = totalVenta.toFixed(2);
+
+                // Agregar producto a la lista de productos seleccionados
+                productosSeleccionados.push({
+                    name: codigoProducto,
+                    quantity: cantidad,
+                    price: precioProducto
+                });
+
+                // Limpiar campos
+                inputProducto.value = "";
+                inputCantidad.value = "";
+            } else {
+                alert('Por favor, selecciona un producto y cantidad válida.');
+            }
+        });
+
+        // Guardar la venta
+        document.querySelector("#guardarVenta button").addEventListener("click", function () {
+            if (productosSeleccionados.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Lista vacía',
+                    text: 'No hay productos para guardar.'
+                });
+                return;
+            }
+
+            fetch("/guardarVenta", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    total: totalVenta,
+                    productos: productosSeleccionados
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Venta guardada',
+                        text: data.message
+                    });
+
+                    // Reiniciar formulario y tabla
+                    productTableBody.innerHTML = "";
+                    totalPurchase.textContent = "0.00";
+                    totalVenta = 0;
+                    productosSeleccionados = [];
+                }
+            })
+            .catch(error => {
+                console.error("Error al guardar la venta:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al guardar',
+                    text: 'Hubo un error al guardar la venta. Intenta de nuevo.'
+                });
+            });
+        });
+    });
+</script>
 
 {% endblock  %}

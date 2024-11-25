@@ -1,18 +1,50 @@
 {% extends "layout.html" %}
 {% block content %}
 
+
 <main class="container" style="background-color: #d1dd94; padding: 20px; border-radius: 8px; margin-top: 20px;">
-        <!-- Listado de personas con deudas -->
-        <h3>Listado de Personas con Deudas</h3>
-        <ul id="personas-deudas" class="list-group">
-        
-        </ul>
-    
-        <!-- Detalles del Crédito (oculto al principio) -->
-        <div id="detalle-credito" class="d-none mt-4">
-            <h4>Detalles del Crédito</h4>
-            <div id="detalle-info"></div>
-            <button class="btn btn-info mt-3" onclick="cerrarDetalles()">Cerrar</button>
-        </div>
+    <!-- Listado de personas con deudas -->
+    <h3 class="text-center">Listado de Personas con Deudas</h3>
+    <ul id="personas-deudas" class="list-group"></ul>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <form class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label for="inputClientCredito" class="form-label mb-0" style="color: #000000;">Nombre del cliente a buscar: </label>
+            </div>
+            <div class="col-auto">
+                <input type="text" class="form-control" id="inputClientCredito" placeholder="nombre del cliente">
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container" id="tabla-productos" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc;">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" style="color:#7c8c3c;">ID</th>
+                    <th scope="col" style="color:#7c8c3c;">Nombres</th>
+                    <th scope="col" style="color:#7c8c3c;">Apellidos</th>
+                    <th scope="col" style="color:#7c8c3c;">Teléfono</th>
+                    <th scope="col" style="color:#7c8c3c;">Fecha Crédito</th>
+                    <th scope="col" style="color:#7c8c3c;">Monto Pendiente</th>
+                    <th scope="col" style="color:#7c8c3c;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for credito in verCredito %}
+                <tr class="tabla_credito">
+                    <td>{{ credito.id }}</td>
+                    <td>{{ credito.nombres }}</td>
+                    <td>{{ credito.apellidos }}</td>
+                    <td>{{ credito.telefono }}</td>
+                    <td>{{ credito.fecha_credito }}</td>
+                    <td>{{ credito.monto_pendiente }}</td>
+                    <td>{{ credito.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </main>
 {% endblock  %}

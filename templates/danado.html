@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container mt-4" style="background-color: #d1dd94; padding: 20px; border-radius: 8px; margin-top: 20px;">
+    <!-- Botón de Registrar en la parte superior -->
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-warning" id="modify-button" style="background-color: #ECC199; color: #000;">Modificar</button>
+    </div>
+
+    <form id="form-consumido" method="POST" action="javascript:void(0)">
+        <div class="d-flex justify-content-between mb-3">
+            <p>Total del consumo: C$<span id="total-consumido">0.00</span></p>
+        </div>
+
+        <div class="mb-3">
+            <label for="fecha-consumido" class="form-label">Fecha de registro</label>
+            <input type="date" class="form-control" id="fecha-consumido" name="fecha_consumido" readonly>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col">
+                <label for="cicloInputConsumido" class="form-label">Producto</label>
+                <input type="text" id="cicloInputConsumido" class="form-control" placeholder="Escribe para buscar..." autocomplete="off">
+                <ul id="suggestions" class="list-group mt-1" style="position: absolute; z-index: 1000; display: none;"></ul>
+            </div>
+            <div class="col">
+                <label for="cantidadConusmido" class="form-label">Cantidad</label>
+                <input type="number" class="form-control" id="cantidadConusmido" placeholder="Cantidad" name="cantidadConsumido" min="1">
+            </div>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="descripcion_articulo">Descripción</span>
+            <input type="text" class="form-control" placeholder="Descripción del producto" aria-label="Descripción" aria-describedby="basic-addon1">
+        </div>
+
+        <!-- Campo para el estado de devolución, deshabilitado para que no se modifique -->
+        <div class="mb-3">
+            <label for="estadoDevolucion" class="form-label">Estado de devolución</label>
+            <input type="checkbox" class="form-check-input" id="estadoDevolucion" disabled>
+            <span id="estadoDevolucionLabel" class="ms-2">0 (No devuelto) / 1 (Devuelto)</span>
+        </div>
+
+        <button type="button" class="btn" id="add-consumido-button" style="background-color: #B2C568; color: #fff;">Añadir Producto</button>
+
+        <div class="mb-3" style="margin-top: 10px;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Producto</th>
+                        <th scope="col">Cantidad</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Estado de devolución</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Aquí se añadirán dinámicamente los datos -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botón de Modificar en la parte inferior -->
+        <div class="d-flex justify-content-end mt-3">
+            <button type="button" class="btn btn-primary" id="btn-registrarConsumido" style="background-color: #789342; color: #fff;">Registrar</button>
+        </div>
+    </form>
+</main>
+{% endblock %}
