@@ -330,6 +330,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+const btnCreditoCliente = document.getElementById('creditoCliente');
 
+btnCreditoCliente.addEventListener('click', () => {
+  const cliente = document.getElementById('nombreClienteAbon').value;
 
-
+  fetch('/creditoCliente', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+      'cliente': cliente
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      Swal.fire({
+        title: 'Éxito!',
+        text: 'Credito asignado correctamente',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+      })
+      .then(() => {
+        
+      });
+    })
+});

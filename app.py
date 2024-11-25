@@ -54,12 +54,9 @@ def contado():
 
 @app.route('/abonarCredito')
 def abonarCredito():
-    try:
-        clientes = db.execute("SELECT id, nombres FROM Cliente").fetchall()
-        return render_template("abonarCredito.html", clientes=clientes)
-    except Exception as e:
-        print("Error en la consulta de clientes:", e)
-        return render_template("abonarCredito.html", clientes=[])
+    query = text("SELECT * FROM Cliente")
+    clientes = db.execute(query).fetchall()
+    return render_template("abonarCredito.html", clientes=clientes)
 
 @app.route('/agregarCliente', methods=['POST', 'GET'])
 def agregarCliente():
@@ -429,6 +426,7 @@ def agregar_producto():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+    
     
 if __name__ == '__main__':
     app.run(debug=True)

@@ -12,10 +12,24 @@
                     <option value="{{ i[0] }}">{{ i[1] }}</option>
                 {% endfor %}
             </select>
+            <button id="creditoCliente" type="button" class="btn btn-primary">Cargar Creditos</button>
         </div>
     </div>
+
+    <!-- tabla con todos los creditos de los clientes-->
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Fecha Credito</th>
+                <th scope="col">Monto Pendiente</th>
+                <th scope="col">Abonar</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <!-- Aquí seañadirán dinámicamente los datos -->
+            
+        </tbody>
+    </table>
 </main>
-<script>
-    const inputNameCustomer = document.getElementById("nombreCliente");
-</script>
 {% endblock %}
