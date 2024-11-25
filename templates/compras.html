@@ -1,40 +1,42 @@
 {% extends "layout.html" %}
 {% block content %}
-
 <main class="container my-5 p-4 rounded" style="background-color: #d1dd94; padding: 20px; border-radius: 8px; margin-top: 20px;">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <!-- Título alineado a la izquierda -->
     <p class="text-start fs-2 mb-0" style="color: #789342; font-weight: 600;">Buscar Por:</p>
 
-    <!-- Botón alineado a la derecha -->
-    <button id="agregarCompraBtn" class="btn btn-success btn-lg px-4 py-2" style="background-color: #5cb85c; border-color: #4cae4c; color: white; font-size: 1.2rem; font-weight: 600;">
-      <i class="bi bi-cart-plus"></i> Agregar Compra
+    <!-- Botón de Agregar Compra alineado a la derecha -->
+    <button id="agregarCompraBtn" class="btn btn-success btn-lg px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalAgregarCompra" style="background-color: #5cb85c; border-color: #4cae4c; color: white; font-size: 1.2rem; font-weight: 600;">
+        <i class="bi bi-cart-plus"></i> Agregar Compra
     </button>
   </div>
+
   <!-- Opciones de búsqueda -->
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="radio" name="flexRadioDefault" id="vendedor">
-    <label class="form-check-label" for="vendedor" style="color:#3d3d3d;">
-      <strong>Vendedor</strong>
-    </label>
-  </div>
+  <div class="mb-4">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="flexRadioDefault" id="vendedor">
+      <label class="form-check-label" for="vendedor" style="color:#3d3d3d;">
+        <strong>Vendedor</strong>
+      </label>
+    </div>
 
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="radio" name="flexRadioDefault" id="fecha" checked>
-    <label class="form-check-label" for="fecha" style="color:#3d3d3d;">
-      <strong>Fecha</strong>
-    </label>
-  </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="flexRadioDefault" id="fecha" checked>
+      <label class="form-check-label" for="fecha" style="color:#3d3d3d;">
+        <strong>Fecha</strong>
+      </label>
+    </div>
 
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="radio" name="flexRadioDefault" id="producto">
-    <label class="form-check-label" for="producto" style="color: #3d3d3d;">
-      <strong>Producto</strong>
-    </label>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="flexRadioDefault" id="producto">
+      <label class="form-check-label" for="producto" style="color: #3d3d3d;">
+        <strong>Producto</strong>
+      </label>
+    </div>
   </div>
 
   <!-- Contenedores dinámicos -->
-  <div class="container-fluid" style=" margin-top: 20px;" id="PorVendedor">
+  <div class="container-fluid" style="margin-top: 20px;" id="PorVendedor">
     <div class="mb-3">
       <select class="form-select" aria-label="Seleccione el Vendedor">
         <option selected>Seleccione el Vendedor:</option>
@@ -56,7 +58,7 @@
     </table>
   </div>
 
-  <div class="container-fluid" style=" margin-top: 20px;" id="PorFecha">
+  <div class="container-fluid" style="margin-top: 20px;" id="PorFecha">
     <div class="mb-3">
       <label class="form-label text-center" style="color:#3d3d3d;">Seleccione en un rango de fecha:</label>
       <div class="input-group">
@@ -82,7 +84,7 @@
     </table>
   </div>
   
-  <div class="container-fluid" style=" margin-top: 20px;" id="PorProducto">
+  <div class="container-fluid" style="margin-top: 20px;" id="PorProducto">
     <form class="row g-2 align-items-center">
       <div class="col-auto">
         <label for="inputProduct" class="form-label mb-0" style="color:#3d3d3d;">Producto a buscar: </label>
@@ -107,10 +109,67 @@
     </table>
   </div>
 
-  
+  <!-- Modal de Agregar Compra -->
+  <div class="modal fade" id="modalAgregarCompra" tabindex="-1" aria-labelledby="modalAgregarCompraLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarCompraLabel">Agregar Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-agregar-compra">
+                    <!-- Fecha no modificable -->
+                    <div class="mb-3">
+                        <label for="fecha" class="form-label">Fecha</label>
+                        <input type="text" class="form-control" id="fecha" name="fecha" value="{{ fecha_actual }}" readonly>
+                    </div>
+                    
+                    <!-- Selección de proveedor -->
+                    <div class="mb-3">
+                        <label for="proveedor" class="form-label">Proveedor</label>
+                        <select class="form-select" id="proveedor" name="proveedor" required>
+                            <option value="" disabled selected>Seleccione un proveedor</option>
+                            {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Selección de producto -->
+                    <div class="mb-3">
+                        <label for="producto" class="form-label">Producto</label>
+                        <select class="form-select" id="producto" name="producto" required>
+                            <option value="" disabled selected>Seleccione un producto</option>
+                            {% for producto in productos %}
+                                <option value="{{ producto.codigo }}" data-precio="{{ producto.precio_unitario }}">
+                                    {{ producto.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Cantidad de producto -->
+                    <div class="mb-3">
+                        <label for="cantidad" class="form-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" required>
+                    </div>
+                    
+                    <!-- Total de la compra -->
+                    <div class="mb-3">
+                        <label for="total" class="form-label">Total</label>
+                        <input type="text" class="form-control" id="total" name="total" readonly>
+                    </div>
+                    
+                    <button type="button" id="btn-agregar-compra" class="btn btn-primary">Agregar Compra</button>
+                </form>
+            </div>
+        </div>
+    </div>
+  </div>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
 </main>
-
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {

@@ -54,7 +54,13 @@ def contado():
 
 @app.route('/abonarCredito')
 def abonarCredito():
-    return render_template('abonarCredito.html')
+    try:
+        clientes = db.execute("SELECT id, nombres FROM Cliente").fetchall()
+        return render_template("abonarCredito.html", clientes=clientes)
+    except Exception as e:
+        print("Error en la consulta de clientes:", e)
+        return render_template("abonarCredito.html", clientes=[])
+
 @app.route('/agregarCliente', methods=['POST', 'GET'])
 def agregarCliente():
     if request.method == 'POST':
@@ -392,8 +398,37 @@ def guardar_consumido():
     except Exception as e:
         db.rollback()  
         return jsonify({'error': str(e)}), 500
+@app.route('/agregar_producto', methods=['POST'])
+def agregar_producto():
+    try:
+        data = request.json
+        codigo = data['codigo']
+        nombre = data['nombre']
+        categoria = data.get('categoria', '')
+        descripcion = data.get('descripcion', '')
 
+        # Asigna cantidad y precio_unitario a 0
+        cantidad = 0
+        precio_unitario = 0
 
+        query = text("""
+            INSERT INTO Producto (codigo, nombre, precio_unitario, cantidad, categoria, descripcion)
+            VALUES (:codigo, :nombre, :precio_unitario, :cantidad, :categoria, :descripcion)
+        """)
+        db.execute(query, {
+            'codigo': codigo,
+            'nombre': nombre,
+            'precio_unitario': precio_unitario,
+            'cantidad': cantidad,
+            'categoria': categoria,
+            'descripcion': descripcion
+        })
+        db.commit()
 
+        return jsonify({'message': 'Producto agregado correctamente'}), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)
