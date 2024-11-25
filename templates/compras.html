@@ -122,7 +122,7 @@
                     <!-- Fecha no modificable -->
                     <div class="mb-3">
                         <label for="fecha" class="form-label">Fecha</label>
-                        <input type="text" class="form-control" id="fecha" name="fecha" value="{{ fecha_actual }}" readonly>
+                        <input type="text" class="form-control" id="fecha-compra" name="fecha-compra" value="{{ fecha_actual }}" readonly>
                     </div>
                     
                     <!-- Selección de proveedor -->
@@ -175,6 +175,11 @@
   document.addEventListener("DOMContentLoaded", function () {
     // Obtenemos los elementos de los radios y los contenedores
     const radioButtons = document.querySelectorAll('input[name="flexRadioDefault"]');
+    const fechaInput = document.getElementById("fecha-compra");
+    const hoy = new Date();
+    const fechaActual = hoy.toISOString().split("T")[0];
+    fechaInput.value = fechaActual;
+
     const contenedores = {
       vendedor: document.getElementById("PorVendedor"),
       fecha: document.getElementById("PorFecha"),
@@ -198,6 +203,7 @@
     // Mostramos el contenedor correspondiente al cargar la página
     mostrarContenedorSeleccionado();
   });
+
 </script>
 
 
