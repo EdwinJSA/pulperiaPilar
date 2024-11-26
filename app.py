@@ -231,6 +231,20 @@ def cargarClientes():
 def guardarCredito():
     try:
         data = json.loads(request.data)
+        #Revisamos si hay suficiente producto en Stock
+        for producto in data['productos']:
+            codigoProducto = obtener_codigo(producto['producto'])
+            query = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query, {'codigo': codigoProducto})
+            cantidad = result.fetchone()[0]
+            if (int(cantidad) < int(producto['cantidad'])):
+                return jsonify({'error': f"No hay suficiente stock para el producto '{producto['producto']}"}), 400
+            
+            query = text("UPDATE Producto SET cantidad = :cantidad WHERE codigo = :codigo")
+            db.execute(query, {'cantidad': (int(cantidad) - int(producto['cantidad'])), 'codigo': codigoProducto})
+            db.commit()
+        
+        
         #recuperamos el monto pendiente y el total
         pendiente = 0
         
@@ -246,7 +260,6 @@ def guardarCredito():
         
         #agregamos los detalles del credito
         for producto in data['productos']:
-            codigoProducto = obtener_codigo(producto['producto'])
             query = text("INSERT INTO DetalleCredito(cantidad, codigo_producto, id_credito) VALUES (:cantidad, :codigo_producto, :id_credito)")
             db.execute(query, {'cantidad': producto['cantidad'], 'codigo_producto': codigoProducto, 'id_credito': id_credito})
             db.commit()
