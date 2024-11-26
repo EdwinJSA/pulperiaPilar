@@ -23,13 +23,112 @@
                 <th scope="col">ID</th>
                 <th scope="col">Fecha Credito</th>
                 <th scope="col">Monto Pendiente</th>
-                <th scope="col">Abonar</th>
+                <th scope="col">Acciones</th>
             </tr>
         </thead>
-        <tbody id="table-body">
+        <tbody id="table-body-credito">
             <!-- Aquí seañadirán dinámicamente los datos -->
             
         </tbody>
     </table>
 </main>
+
+
+<!-- Modal: Abonar -->
+<div class="modal fade" id="modalAbonar" tabindex="-1" aria-labelledby="modalAbonarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalAbonarLabel">Abonar al Crédito</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-abonar">
+            <div class="mb-3">
+              <label for="credito-id" class="form-label">ID del Crédito</label>
+              <input type="text" class="form-control" id="credito-id" name="credito_id" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="monto-abonar" class="form-label">Monto a Abonar</label>
+              <input type="number" class="form-control" id="monto-abonar" name="monto_abonar" required>
+            </div>
+            <button type="button" id="agregarAbono" class="btn btn-primary">Confirmar Abono</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Ver Detalles -->
+  <div class="modal fade" id="modalVerDetalles" tabindex="-1" aria-labelledby="modalVerDetallesLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalVerDetallesLabel">Detalles del Crédito</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="detalle-productos" class="form-label">Productos:</label>
+            <textarea id="detalle-productos" class="form-control" rows="5" readonly></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Seleccionar el cuerpo de la tabla donde se generan los datos dinámicamente
+        const tablaCredito = document.getElementById("table-body-credito");
+      
+        // Event listener para manejar los clics en los botones generados dinámicamente
+        tablaCredito.addEventListener("click", (e) => {
+          // Mostrar el modal "Abonar"
+          if (e.target.matches("#btn-editar") || e.target.closest("#btn-editar")) {
+            const button = e.target.closest("#btn-editar");
+            const idCredito = button.getAttribute("data-codigo");
+      
+            // Rellenar el campo con el ID del crédito (opcional, si lo necesitas)
+            document.getElementById("credito-id").value = idCredito;
+      
+            // Mostrar el modal de abonar
+            const modalAbonar = new bootstrap.Modal(document.getElementById("modalAbonar"));
+            modalAbonar.show();
+          }
+      
+          // Mostrar el modal "Ver Detalles"
+          if (e.target.matches("#btn-detalles") || e.target.closest("#btn-detalles")) {
+            const button = e.target.closest("#btn-detalles");
+            const idCredito = button.getAttribute("data-codigo");
+
+            fetch('/verProductosCredito', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                  'credito_id': idCredito
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log(data.productos);
+                const detalleProductos = document.getElementById("detalle-productos");
+                const productos = data.productos;
+                const listaProductos = productos.map(producto => `${producto}`).join('\n');
+                detalleProductos.innerHTML = listaProductos;
+              })
+      
+            // Aquí se podría cargar información adicional si fuera necesario, pero para mostrar el modal:
+            const modalVerDetalles = new bootstrap.Modal(document.getElementById("modalVerDetalles"));
+            modalVerDetalles.show();
+          }
+        });
+      });
+
+      
+</script>
 {% endblock %}

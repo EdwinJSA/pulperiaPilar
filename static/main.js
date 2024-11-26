@@ -247,6 +247,7 @@ const btnCreditoCliente = document.getElementById('creditoCliente');
 
 btnCreditoCliente.addEventListener('click', () => {
   const cliente = document.getElementById('nombreClienteAbon').value;
+  console.log("---->" + cliente);
 
   fetch('/creditoCliente', {
     method: 'POST',
@@ -261,14 +262,68 @@ btnCreditoCliente.addEventListener('click', () => {
     .then(response => response.json())
     .then(data => {
       console.log(data);
-      Swal.fire({
-        title: 'Éxito!',
-        text: 'Credito asignado correctamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-      })
-      .then(() => {
-        
+      const tablaCredito = document.getElementById('table-body-credito');
+      tablaCredito.innerHTML = '';
+
+      data.forEach(credito => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${credito.id_credito}</td>
+          <td>${credito.fecha_credito}</td>
+          <td>${credito.monto_pendiente}</td>
+          <td> 
+            <button class="btn btn-sm btn-primary me-2" id="btn-editar"
+                data-codigo="${credito.id_credito}">
+                <i class="fi fi-rr-edit">Abonar</i>
+            </button>        
+            <button class="btn btn-sm btn-info me-2" id="btn-detalles"
+                data-codigo="${credito.id_credito}">
+                <i class="fi fi-rr-edit">Ver Detalles</i>
+            </button>   
+          </td>
+        `;
+        tablaCredito.appendChild(row);
       });
     })
 });
+
+
+const abono = document.getElementById('agregarAbono');
+
+abono.addEventListener('click', () => {
+  const credito_id = document.getElementById('credito-id').value;
+  const monto_abonar = document.getElementById('monto-abonar').value;
+
+  if (monto_abonar <= 0) {
+    Swal.fire({
+      title: 'Error',
+      text: 'El monto debe ser mayor a 0',
+      icon: 'error',
+      confirmButtonText: 'Aceptar'
+    });
+    return;
+  }
+
+  fetch('/abonarCreditoCliente', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+      'credito_id': credito_id,
+      'monto_abonar': monto_abonar
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    Swal.fire({
+      title: 'Éxito!',
+      text: 'Abono realizado correctamente',
+      icon: 'success',
+      confirmButtonText: 'Aceptar'
+    }).then(() => {
+      location.reload();
+    });
+  })
+})

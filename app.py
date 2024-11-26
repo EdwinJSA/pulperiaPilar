@@ -428,5 +428,98 @@ def agregar_producto():
         return jsonify({'error': str(e)}), 500
     
     
+@app.route('/creditoCliente', methods=['POST'])
+def creditoCliente():
+    try:
+        data = request.json
+        cliente = data['cliente']
+        print(f"Obteniendo credito del cliente: {cliente}")
+        query = text("""
+            SELECT 
+                Credito.id AS id_credito,
+                Credito.fecha_credito,
+                Credito.monto_pendiente
+            FROM 
+                Credito
+            INNER JOIN 
+                Cliente ON Credito.id_cliente = Cliente.id
+            WHERE 
+                Cliente.id = :id_cliente;
+        """)
+        
+        # Ejecutar la consulta
+        result = db.execute(query, {'id_cliente': cliente})
+        
+        # Convertir los resultados a una lista de diccionarios
+        credito = [
+            {
+                'id_credito': row.id_credito,
+                'fecha_credito': row.fecha_credito,
+                'monto_pendiente': row.monto_pendiente
+            } for row in result
+        ]
+        
+        # Retornar los resultados en formato JSON
+        return jsonify(credito), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+        
+@app.route('/abonarCreditoCliente', methods=['POST'])
+def abonarCreditoCliente():
+    if request.method == 'POST':
+        data = request.json
+        print(data.keys())
+        id_credito = data['credito_id']
+        monto_abonado = data['monto_abonar']
+        
+        query = text("""
+            UPDATE Credito
+            SET monto_pendiente = monto_pendiente - :monto_abonado
+            WHERE id = :id_credito
+        """)
+        db.execute(query, {'monto_abonado': monto_abonado, 'id_credito': id_credito})
+        db.commit()
+        
+        query = text("""
+            UPDATE Credito
+            SET monto_pagado = monto_pagado + :monto_abonado
+            WHERE id = :id_credito
+        """)
+        db.execute(query, {'monto_abonado': monto_abonado, 'id_credito': id_credito})
+        db.commit()
+        
+        return jsonify({'message': 'Credito abonado correctamente'}), 200
+    
+    return jsonify({'error': 'Metodo no permitido'}), 405
+
+
+@app.route('/verProductosCredito', methods=['POST'])
+def verProductosCredito():
+    if request.method == 'POST':
+        data = request.json
+        credito_id = data['credito_id']
+        print("CREDITO ID:", credito_id)
+        
+        query = text("""
+            SELECT p.nombre
+            FROM DetalleCredito dc
+            JOIN Producto p ON dc.codigo_producto = p.codigo
+            WHERE dc.id_credito = :id_credito;
+        """)
+        
+        # Ejecutar la consulta y obtener los resultados
+        result = db.execute(query, {'id_credito': credito_id}).fetchall()
+        
+        # Convertir los resultados en una lista de nombres
+        productos = [row[0] for row in result]  # row[0] porque seleccionamos solo `p.nombre`
+        print(productos)
+        
+        # Devolver los productos como JSON
+        return jsonify({'productos': productos}), 200
+    
+    return jsonify({'error': 'Metodo no permitido'}), 405
+
+
 if __name__ == '__main__':
     app.run(debug=True)
