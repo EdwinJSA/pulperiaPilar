@@ -1,110 +1,40 @@
 {% extends "layout.html" %}
 {% block content %}
-<main class="container my-5 p-4 rounded" style="background-color: #d1dd94; padding: 20px; border-radius: 8px; margin-top: 20px;">
+<main class="container my-5 p-4 rounded" style="background-color: #d1dd94;">
+  <!-- Cabecera -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <!-- Título alineado a la izquierda -->
-    <p class="text-start fs-2 mb-0" style="color: #789342; font-weight: 600;">Buscar Por:</p>
-
-    <!-- Botón de Agregar Compra alineado a la derecha -->
-    <button id="agregarCompraBtn" class="btn btn-success btn-lg px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalAgregarCompra" style="background-color: #5cb85c; border-color: #4cae4c; color: white; font-size: 1.2rem; font-weight: 600;">
-        <i class="bi bi-cart-plus"></i> Agregar Compra
+    <h2 class="text-success">Gestionar Compras</h2>
+    <button id="agregarCompraBtn" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalAgregarCompra">
+      <i class="bi bi-cart-plus"></i> Agregar Compra
     </button>
   </div>
 
-  <!-- Opciones de búsqueda -->
+  <!-- Búsqueda por proveedor -->
   <div class="mb-4">
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="flexRadioDefault" id="vendedor">
-      <label class="form-check-label" for="vendedor" style="color:#3d3d3d;">
-        <strong>Vendedor</strong>
-      </label>
-    </div>
-
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="flexRadioDefault" id="fecha" checked>
-      <label class="form-check-label" for="fecha" style="color:#3d3d3d;">
-        <strong>Fecha</strong>
-      </label>
-    </div>
-
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="flexRadioDefault" id="producto">
-      <label class="form-check-label" for="producto" style="color: #3d3d3d;">
-        <strong>Producto</strong>
-      </label>
-    </div>
+    <label for="nombreProveedorC" class="form-label fw-bold text-success">Buscar por Proveedor:</label>
+    <select name="cliente" id="nombreProveedorC" class="form-select">
+      <option value="">Seleccione un proveedor</option>
+      {% for proveedor in proveedores %}
+      <option value="{{ proveedor.nombre }}">{{ proveedor.nombre }} {{ proveedor.apellido }}</option>
+      {% endfor %}
+    </select>
+    <button id="buscarPorProveedor" class="btn btn-primary">Buscar</button>
   </div>
 
-  <!-- Contenedores dinámicos -->
-  <div class="container-fluid" style="margin-top: 20px;" id="PorVendedor">
-    <div class="mb-3">
-      <select class="form-select" aria-label="Seleccione el Vendedor">
-        <option selected>Seleccione el Vendedor:</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
-      </select>
-    </div>
-    <table class="table">
+  <!-- Tabla de resultados -->
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
       <thead class="table-dark">
         <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Producto</th>
-          <th scope="col">Cantidad</th>
-          <th scope="col">Total</th>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Total</th>
         </tr>
       </thead>
-    </table>
-  </div>
-
-  <div class="container-fluid" style="margin-top: 20px;" id="PorFecha">
-    <div class="mb-3">
-      <label class="form-label text-center" style="color:#3d3d3d;">Seleccione en un rango de fecha:</label>
-      <div class="input-group">
-        <span class="input-group-text">De:</span>
-        <input type="date" class="form-control" aria-label="Fecha de inicio">
-        <span class="input-group-text">A</span>
-        <input type="date" class="form-control" aria-label="Fecha de fin">
-        <button class="btn btn-primary" type="button">
-          <i class="bi bi-search"></i>
-        </button>
-      </div>
-    </div>
-    <table class="table">
-      <thead class="table-dark">
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Producto</th>
-          <th scope="col">Cantidad</th>
-          <th scope="col">Total</th>
-        </tr>
-      </thead>
-    </table>
-  </div>
-  
-  <div class="container-fluid" style="margin-top: 20px;" id="PorProducto">
-    <form class="row g-2 align-items-center">
-      <div class="col-auto">
-        <label for="inputProduct" class="form-label mb-0" style="color:#3d3d3d;">Producto a buscar: </label>
-      </div>
-      <div class="col-auto">
-        <input type="text" class="form-control" id="inputProduct" placeholder="Ingrese el producto">
-      </div>
-    </form>
-    <table class="table mt-3">
-      <thead class="table-dark">
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Producto</th>
-          <th scope="col">Cantidad</th>
-          <th scope="col">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Aquí se pueden agregar las filas de la tabla dinámicamente -->
+      <tbody id="tablaResultados">
+        <!-- Contenido dinámico -->
       </tbody>
     </table>
   </div>
@@ -114,112 +44,75 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalAgregarCompraLabel">Agregar Compra</h5>
+          <h5 class="modal-title text-success" id="modalAgregarCompraLabel">Agregar Compra</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form id="form-agregar-compra">
-            <!-- Fecha no modificable -->
+            <!-- Fecha -->
             <div class="mb-3">
-              <label for="fecha" class="form-label">Fecha</label>
+              <label for="fecha-compra" class="form-label">Fecha</label>
               <input type="text" class="form-control" id="fecha-compra" name="fecha-compra" value="{{ fecha_actual }}" readonly>
             </div>
-            
-            <!-- Selección de proveedor -->
+            <!-- Proveedor -->
             <div class="mb-3">
-              <label for="proveedor" class="form-label">Proveedor</label>
+              <label for="proveedorCompra" class="form-label">Proveedor</label>
               <select class="form-select" id="proveedorCompra" name="proveedorCompra" required>
                 <option value="" disabled selected>Seleccione un proveedor</option>
                 {% for proveedor in proveedores %}
-                  <option value="{{ proveedor.nombre }}">{{ proveedor.nombre }} {{ proveedor.apellido }}</option>
+                <option value="{{ proveedor.nombre }}">{{ proveedor.nombre }} {{ proveedor.apellido }}</option>
                 {% endfor %}
               </select>
             </div>
-            
-            <!-- Selección de producto -->
+            <!-- Producto -->
             <div class="mb-3 position-relative">
               <label for="cicloInput" class="form-label">Producto</label>
               <input type="text" id="cicloInput" class="form-control" placeholder="Escribe para buscar..." autocomplete="off">
-              <ul id="suggestions" class="list-group mt-1" style="position: absolute; z-index: 1000; display: none;"></ul>
+              <ul id="suggestions" class="list-group mt-1 position-absolute w-100" style="z-index: 1000; display: none;"></ul>
             </div>
-            
-            <!-- Cantidad de producto -->
+            <!-- Cantidad -->
             <div class="mb-3">
               <label for="cantidad" class="form-label">Cantidad</label>
               <input type="number" id="cantidad" class="form-control" min="1" required>
             </div>
-            
-            <!-- Botón para agregar el producto -->
-            <button type="button" id="btn-agregar-producto" class="btn btn-primary">Agregar Producto</button>
-            <!-- Lista de productos agregados -->
-            <h6 class="mb-3">Productos agregados:</h6>
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody id="productos-agregados">
-                <!-- Aquí se llenarán los productos dinámicamente -->
-              </tbody>
-            </table>
+            <!-- Botón Agregar Producto -->
+            <button type="button" id="btn-agregar-producto" class="btn btn-primary mb-3">Agregar Producto</button>
+            <!-- Lista de Productos -->
+            <h6>Productos Agregados:</h6>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID Compra</th>
+                    <th>Fecha Compra</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody id="productosTabla">
+                  <!-- Las filas se agregarán aquí -->
+                </tbody>
+              </table>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" id="guardar-compra">Guardar Compra</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de Editar Producto -->
-  <div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-labelledby="modalEditarProductoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalEditarProductoLabel">Editar Producto</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="form-editar-producto">
-            <!-- ID del producto (oculto) -->
-            <input type="hidden" id="producto-id">
-            
-            <!-- Nombre del producto -->
-            <div class="mb-3">
-              <label for="producto-nombre" class="form-label">Nombre del Producto</label>
-              <input type="text" class="form-control" id="producto-nombre" name="producto-nombre" required>
-            </div>
-            
-            <!-- Precio unitario -->
-            <div class="mb-3">
-              <label for="producto-precio" class="form-label">Precio Unitario</label>
-              <input type="number" class="form-control" id="producto-precio" name="producto-precio" step="0.01" required>
-            </div>
-            
-            <!-- Cantidad -->
-            <div class="mb-3">
-              <label for="producto-cantidad" class="form-label">Cantidad</label>
-              <input type="number" class="form-control" id="producto-cantidad" name="producto-cantidad" required>
-            </div>
-            
-            <!-- Botón para guardar cambios -->
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-          </form>
+          <button type="button" class="btn btn-success" id="guardar-compra">Guardar Compra</button>
         </div>
       </div>
     </div>
   </div>
 </main>
+
 <script>
   const options = JSON.parse('{{ producto|safe }}');
   const input = document.getElementById("cicloInput");
   const suggestions = document.getElementById("suggestions");
   const productosAgregados = [];
   const lista = document.getElementById("productos-agregados");
+  const inputNameCustomer = document.getElementById("nombreProveedorC");
   
   // Manejo del autocompletado de productos
   input.addEventListener("input", () => {
@@ -403,5 +296,59 @@
         });
       });
   });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const bpp = document.getElementById('buscarPorProveedor');
+    bpp.addEventListener('click', () => {
+      const nombreProveedor = document.getElementById("nombreProveedorC").value;
+  
+      // Verifica que el proveedor no esté vacío
+      if (!nombreProveedor) {
+        alert("Por favor, ingresa un nombre de proveedor.");
+        return;
+      }
+  
+      fetch('/buscarPorProveedor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')  // Asegúrate de que getCookie esté definida
+        },
+        body: JSON.stringify({
+          'proveedor': nombreProveedor
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data['productos']);  // Verifica el contenido de los productos
+        
+        // Verifica si hay productos
+        if (data['productos'].length === 0) {
+          alert('No se encontraron productos para este proveedor.');
+          return;
+        }
+  
+        // Vacía la tabla antes de agregar nuevos datos
+        const productosTabla = document.getElementById('tablaResultados');
+        productosTabla.innerHTML = ''; // Limpiar la tabla antes de agregar filas
+  
+        // Agrega las filas a la tabla
+        data['productos'].forEach(producto => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${producto['id_compra']}</td>
+            <td>${producto['fecha_compra']}</td>
+            <td>${producto['producto']}</td>
+            <td>${producto['cantidad']}</td>
+            <td>${producto['total']}</td>
+          `;
+          productosTabla.appendChild(row);
+          console.log("Fila agregada: ", row);  // Depuración para ver si la fila se agrega
+        });
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  });
+  
   </script>  
 {% endblock %}

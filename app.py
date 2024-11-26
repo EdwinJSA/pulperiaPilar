@@ -494,10 +494,23 @@ def registrar_compra():
             VALUES (:fecha, :total, :id_proveedor)
             RETURNING id
         """)
-        compra_id = db.execute(query, {'fecha': fecha, 'total': total, 'id_proveedor': id_proveedor}).fetchone()[0]
+        db.execute(query, {'fecha': fecha, 'total': total, 'id_proveedor': id_proveedor})
+        db.commit()
+        
+        # Obtener el ID de la compra recientemente insertada
+        query = text("SELECT id FROM Compra ORDER BY id DESC LIMIT 1")
+        result = db.execute(query)
+        compra_id = result.fetchone()[0]
 
         # Insertar detalles de la compra en DetalleCompra
         for producto in productos:
+            print("===========================================================")
+            print(producto['codigo_producto'])
+            print(producto['cantidad'])
+            print(compra_id)
+            print("===========================================================")
+            
+            
             query = text("""
                 INSERT INTO DetalleCompra (cantidad, codigo_producto, id_compra)
                 VALUES (:cantidad, :codigo_producto, :id_compra)
@@ -507,6 +520,7 @@ def registrar_compra():
                 'codigo_producto': producto['codigo_producto'],
                 'id_compra': compra_id
             })
+            db.commit()
 
             # Actualizar la cantidad del producto en la tabla Producto
             query = text("""
@@ -518,8 +532,7 @@ def registrar_compra():
                 'cantidad': producto['cantidad'],
                 'codigo_producto': producto['codigo_producto']
             })
-
-        db.commit()  # Confirmar las transacciones
+            db.commit()  # Confirmar las transacciones
 
         return jsonify({'message': 'Compra registrada exitosamente', 'compra_id': compra_id}), 201
 
@@ -727,6 +740,49 @@ def agregar_nuevo_producto():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': 'Error al agregar el producto'}), 500
+
+@app.route('/buscarPorProveedor', methods=['POST'])
+def buscar_por_proveedor():
+    if request.method == 'POST':
+        data = request.json
+        proveedor = data['proveedor']
+
+        query = text("""
+            SELECT 
+                c.id AS id_compra,
+                c.fecha AS fecha_compra,
+                p.nombre AS producto,
+                dc.cantidad AS cantidad,
+                (dc.cantidad * p.precio_unitario) AS total
+            FROM 
+                Compra c
+            JOIN 
+                DetalleCompra dc ON c.id = dc.id_compra
+            JOIN 
+                Producto p ON dc.codigo_producto = p.codigo
+            JOIN
+                Proveedor pr ON c.id_proveedor = pr.id
+            WHERE 
+                pr.nombres = :proveedor
+        """)
+        result = db.execute(query, {'proveedor': proveedor}).fetchall()
+
+        # Convierte las filas a diccionarios
+        productos = [
+            {
+                'id_compra': row.id_compra,
+                'fecha_compra': row.fecha_compra,
+                'producto': row.producto,
+                'cantidad': row.cantidad,
+                'total': row.total
+            }
+            for row in result
+        ]
+
+        return jsonify({'productos': productos}), 200
+    
+    return jsonify({'error': 'Método no permitido'}), 405
+
 
 
 
