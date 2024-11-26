@@ -80,21 +80,20 @@
             <!-- Lista de Productos -->
             <h6>Productos Agregados:</h6>
             <div class="table-responsive">
-              <table>
-                <thead>
+              <table class="table table-bordered table-striped">
+                <thead class="table-light">
                   <tr>
-                    <th>ID Compra</th>
-                    <th>Fecha Compra</th>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Total</th>
+                    <th scope="col">Fecha Compra</th>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Cantidad</th>
                   </tr>
                 </thead>
                 <tbody id="productosTabla">
-                  <!-- Las filas se agregarán aquí -->
+                  <!-- Las filas se agregarán dinámicamente aquí -->
                 </tbody>
               </table>
-            </div>
+            </div
+            
           </form>
         </div>
         <div class="modal-footer">
@@ -176,6 +175,21 @@
     btnAgregarProducto.addEventListener("click", () => {
       const producto = document.getElementById("cicloInput").value;
       const cantidad = parseInt(document.getElementById("cantidad").value);
+      const tabla = document.getElementById("productosTabla");
+      const fecha = document.getElementById("fecha-compra").value;
+      const nombreProveedor = document.getElementById("proveedorCompra");
+      nombreProveedor.disabled = true;
+
+      productosTabla.innerHTML += `
+      <tr>
+          <td>${fecha}</td>
+          <td>${producto}</td>
+          <td>${cantidad}</td>
+      </tr>
+      `;
+
+      document.getElementById("cicloInput").value = "";
+      document.getElementById("cantidad").value = "";
   
       if (!producto || !cantidad || cantidad <= 0) {
         Swal.fire({
@@ -185,6 +199,8 @@
         });
         return;
       }
+
+
   
       productosAgregados.push({ producto, cantidad });
   
