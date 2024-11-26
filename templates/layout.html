@@ -56,6 +56,14 @@
                 <li><a class="dropdown-item" href="{{ url_for('proveedores') }}">Proveedores</a></li>
               </ul>
             </li>
+
+            <li class="nav-item dropdown" id="myDropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Salidas</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('consumido') }}">Producto Consumidos</a></li>
+              <li> <a class="dropdown-item " href="{{ url_for('danado') }}">Productos dañados</a></li>
+              </ul>
+            </li>   
           </ul>
         </div>
       </div>
