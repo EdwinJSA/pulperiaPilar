@@ -111,100 +111,297 @@
 
   <!-- Modal de Agregar Compra -->
   <div class="modal fade" id="modalAgregarCompra" tabindex="-1" aria-labelledby="modalAgregarCompraLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalAgregarCompraLabel">Agregar Compra</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="form-agregar-compra">
-                    <!-- Fecha no modificable -->
-                    <div class="mb-3">
-                        <label for="fecha" class="form-label">Fecha</label>
-                        <input type="text" class="form-control" id="fecha-compra" name="fecha-compra" value="{{ fecha_actual }}" readonly>
-                    </div>
-                    
-                    <!-- Selección de proveedor -->
-                    <div class="mb-3">
-                        <label for="proveedor" class="form-label">Proveedor</label>
-                        <select class="form-select" id="proveedor" name="proveedor" required>
-                            <option value="" disabled selected>Seleccione un proveedor</option>
-                            {% for proveedor in proveedores %}
-                                <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <!-- Selección de producto -->
-                    <div class="mb-3">
-                        <label for="producto" class="form-label">Producto</label>
-                        <select class="form-select" id="producto" name="producto" required>
-                            <option value="" disabled selected>Seleccione un producto</option>
-                            {% for producto in productos %}
-                                <option value="{{ producto.codigo }}" data-precio="{{ producto.precio_unitario }}">
-                                    {{ producto.nombre }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <!-- Cantidad de producto -->
-                    <div class="mb-3">
-                        <label for="cantidad" class="form-label">Cantidad</label>
-                        <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" required>
-                    </div>
-                    
-                    <!-- Total de la compra -->
-                    <div class="mb-3">
-                        <label for="total" class="form-label">Total</label>
-                        <input type="text" class="form-control" id="total" name="total" readonly>
-                    </div>
-                    
-                    <button type="button" id="btn-agregar-compra" class="btn btn-primary">Agregar Compra</button>
-                </form>
-            </div>
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalAgregarCompraLabel">Agregar Compra</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body">
+          <form id="form-agregar-compra">
+            <!-- Fecha no modificable -->
+            <div class="mb-3">
+              <label for="fecha" class="form-label">Fecha</label>
+              <input type="text" class="form-control" id="fecha-compra" name="fecha-compra" value="{{ fecha_actual }}" readonly>
+            </div>
+            
+            <!-- Selección de proveedor -->
+            <div class="mb-3">
+              <label for="proveedor" class="form-label">Proveedor</label>
+              <select class="form-select" id="proveedorCompra" name="proveedorCompra" required>
+                <option value="" disabled selected>Seleccione un proveedor</option>
+                {% for proveedor in proveedores %}
+                  <option value="{{ proveedor.nombre }}">{{ proveedor.nombre }} {{ proveedor.apellido }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            
+            <!-- Selección de producto -->
+            <div class="mb-3 position-relative">
+              <label for="cicloInput" class="form-label">Producto</label>
+              <input type="text" id="cicloInput" class="form-control" placeholder="Escribe para buscar..." autocomplete="off">
+              <ul id="suggestions" class="list-group mt-1" style="position: absolute; z-index: 1000; display: none;"></ul>
+            </div>
+            
+            <!-- Cantidad de producto -->
+            <div class="mb-3">
+              <label for="cantidad" class="form-label">Cantidad</label>
+              <input type="number" id="cantidad" class="form-control" min="1" required>
+            </div>
+            
+            <!-- Botón para agregar el producto -->
+            <button type="button" id="btn-agregar-producto" class="btn btn-primary">Agregar Producto</button>
+            <!-- Lista de productos agregados -->
+            <h6 class="mb-3">Productos agregados:</h6>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="productos-agregados">
+                <!-- Aquí se llenarán los productos dinámicamente -->
+              </tbody>
+            </table>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="guardar-compra">Guardar Compra</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Modal de Editar Producto -->
+  <div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-labelledby="modalEditarProductoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarProductoLabel">Editar Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-editar-producto">
+            <!-- ID del producto (oculto) -->
+            <input type="hidden" id="producto-id">
+            
+            <!-- Nombre del producto -->
+            <div class="mb-3">
+              <label for="producto-nombre" class="form-label">Nombre del Producto</label>
+              <input type="text" class="form-control" id="producto-nombre" name="producto-nombre" required>
+            </div>
+            
+            <!-- Precio unitario -->
+            <div class="mb-3">
+              <label for="producto-precio" class="form-label">Precio Unitario</label>
+              <input type="number" class="form-control" id="producto-precio" name="producto-precio" step="0.01" required>
+            </div>
+            
+            <!-- Cantidad -->
+            <div class="mb-3">
+              <label for="producto-cantidad" class="form-label">Cantidad</label>
+              <input type="number" class="form-control" id="producto-cantidad" name="producto-cantidad" required>
+            </div>
+            
+            <!-- Botón para guardar cambios -->
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
-
 <script>
+  const options = JSON.parse('{{ producto|safe }}');
+  const input = document.getElementById("cicloInput");
+  const suggestions = document.getElementById("suggestions");
+  const productosAgregados = [];
+  const lista = document.getElementById("productos-agregados");
+  
+  // Manejo del autocompletado de productos
+  input.addEventListener("input", () => {
+    const query = input.value.toLowerCase();
+    suggestions.innerHTML = "";
+    suggestions.style.display = "none";
+  
+    if (query) {
+      const matches = options.filter(option => option.toLowerCase().includes(query));
+      if (matches.length) {
+        matches.forEach(match => {
+          const li = document.createElement("li");
+          li.textContent = match;
+          li.className = "list-group-item list-group-item-action";
+          li.addEventListener("click", () => {
+            input.value = match;
+            suggestions.style.display = "none";
+          });
+          suggestions.appendChild(li);
+        });
+        suggestions.style.display = "block";
+      }
+    }
+  });
+  
+  // Al cargar el contenido del DOM
   document.addEventListener("DOMContentLoaded", function () {
-    // Obtenemos los elementos de los radios y los contenedores
+    // Radios y contenedores
     const radioButtons = document.querySelectorAll('input[name="flexRadioDefault"]');
-    const fechaInput = document.getElementById("fecha-compra");
-    const hoy = new Date();
-    const fechaActual = hoy.toISOString().split("T")[0];
-    fechaInput.value = fechaActual;
-
     const contenedores = {
       vendedor: document.getElementById("PorVendedor"),
       fecha: document.getElementById("PorFecha"),
       producto: document.getElementById("PorProducto")
     };
-
-    // Función para mostrar el contenedor correspondiente y ocultar los demás
+  
+    // Fecha no modificable
+    const fechaInput = document.getElementById("fecha-compra");
+    const hoy = new Date();
+    const fechaActual = hoy.toISOString().split("T")[0];
+    fechaInput.value = fechaActual;
+  
+    // Mostrar contenedor seleccionado
     function mostrarContenedorSeleccionado() {
       const seleccionado = document.querySelector('input[name="flexRadioDefault"]:checked').id;
-
       for (let key in contenedores) {
         contenedores[key].style.display = key === seleccionado ? "block" : "none";
       }
     }
-
-    // Escuchamos el evento de cambio en los radios
+  
     radioButtons.forEach((radio) => {
       radio.addEventListener("change", mostrarContenedorSeleccionado);
     });
-
-    // Mostramos el contenedor correspondiente al cargar la página
-    mostrarContenedorSeleccionado();
+  
+    mostrarContenedorSeleccionado(); // Mostrar al cargar la página
   });
-
-</script>
-
-
+  
+  // Agregar evento al botón "Agregar Producto"
+  document.addEventListener("DOMContentLoaded", function () {
+    const btnAgregarProducto = document.getElementById("btn-agregar-producto");
+  
+    btnAgregarProducto.addEventListener("click", () => {
+      const producto = document.getElementById("cicloInput").value;
+      const cantidad = parseInt(document.getElementById("cantidad").value);
+  
+      if (!producto || !cantidad || cantidad <= 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "Datos incompletos",
+          text: "Debes seleccionar un producto y especificar una cantidad válida.",
+        });
+        return;
+      }
+  
+      productosAgregados.push({ producto, cantidad });
+  
+      actualizarListaProductos();
+  
+      // Limpiar campos
+      document.getElementById("cicloInput").value = "";
+      document.getElementById("cantidad").value = "";
+  
+      Swal.fire({
+        icon: "success",
+        title: "Producto agregado",
+        text: `Se agregó "${producto}" con cantidad ${cantidad} a la lista.`,
+      });
+    });
+  
+    // Actualizar la lista visual de productos agregados
+    function actualizarListaProductos() {
+      lista.innerHTML = ""; // Limpiar contenido previo
+  
+      productosAgregados.forEach((item, index) => {
+        const tr = document.createElement("tr");
+  
+        // Crear columnas para el producto, cantidad y botón de eliminación
+        const tdProducto = document.createElement("td");
+        tdProducto.textContent = item.producto;
+        
+        const tdCantidad = document.createElement("td");
+        tdCantidad.textContent = item.cantidad;
+  
+        const tdAccion = document.createElement("td");
+        const btnEliminar = document.createElement("button");
+        btnEliminar.className = "btn btn-danger btn-sm";
+        btnEliminar.textContent = "Eliminar";
+        btnEliminar.addEventListener("click", () => {
+          productosAgregados.splice(index, 1);
+          actualizarListaProductos();
+        });
+  
+        // Agregar botón de eliminación a la columna de acción
+        tdAccion.appendChild(btnEliminar);
+  
+        // Añadir las columnas a la fila
+        tr.appendChild(tdProducto);
+        tr.appendChild(tdCantidad);
+        tr.appendChild(tdAccion);
+  
+        // Añadir la fila a la tabla
+        lista.appendChild(tr);
+      });
+    }
+  });
+  
+  // Guardar compra
+  document.getElementById("guardar-compra").addEventListener("click", () => {
+    if (!productosAgregados.length) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sin productos",
+        text: "No se han agregado productos a la compra.",
+      });
+      return;
+    }
+  
+    const proveedor = document.getElementById("proveedorCompra").value;
+    const fecha = document.getElementById("fecha-compra").value;
+  
+    const datosCompra = {
+      fecha: fecha,
+      id_proveedor: proveedor, // Asegúrate de enviar el ID del proveedor
+      productos: productosAgregados.map(item => {
+        const [codigo_producto] = item.producto.split("-"); // Suponiendo que `producto` incluye el código
+        return { codigo_producto: codigo_producto.trim(), cantidad: item.cantidad };
+      })
+    };
+  
+    fetch('/registrar_compra', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(datosCompra)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Error al registrar la compra: " + data.error,
+          });
+        } else {
+          Swal.fire({
+            icon: "success",
+            title: "Compra registrada",
+            text: `La compra se registró con éxito. ID: ${data.compra_id}`,
+            confirmButtonText: "Aceptar"
+          }).then(() => {
+            location.reload(); // Recargar página o realizar otra acción
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error inesperado",
+          text: "Ocurrió un error al registrar la compra.",
+        });
+      });
+  });
+  </script>  
 {% endblock %}

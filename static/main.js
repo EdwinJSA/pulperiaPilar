@@ -98,6 +98,29 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+document.querySelectorAll('#btn-editar').forEach(button => {
+  button.addEventListener('click', function () {
+      // Obtener los datos del producto desde los atributos del botón
+      const codigo = this.getAttribute('data-codigo');
+      const nombre = this.getAttribute('data-nombre');
+      const precio = this.getAttribute('data-precio');
+      const cantidad = this.getAttribute('data-cantidad');
+      const categoria = this.getAttribute('data-categoria');
+      const descripcion = this.getAttribute('data-descripcion');
+      
+      // Cargar los valores en el formulario de edición
+      document.getElementById('codigo-editar').value = codigo;
+      document.getElementById('nombre-editar').value = nombre;
+      document.getElementById('precio-editar').value = precio;
+      document.getElementById('cantidad-editar').value = cantidad;
+      document.getElementById('categoria-editar').value = categoria;
+      document.getElementById('descripcion-editar').value = descripcion;
+      
+      // Mostrar el modal
+      $('#modalEditarProducto').modal('show');
+  });
+});
+
 document.addEventListener('DOMContentLoaded', function () {
   const guardarCambios = document.getElementById('guardarCambios');
 
