@@ -230,85 +230,41 @@ def cargarClientes():
 @app.route('/guardarCredito', methods=['POST'])
 def guardarCredito():
     try:
-        data = request.get_json()
-        print(data)
-        cliente = data['cliente']
-        productos = data['productos']
+        data = json.loads(request.data)
+        #recuperamos el monto pendiente y el total
+        pendiente = 0
         
-        # Iniciamos la transacción
-        db.begin()
-
-        # Creamos un nuevo crédito al cliente
-        query = text("INSERT INTO Credito (id_cliente) VALUES (:id_cliente)")
-        db.execute(query, {'id_cliente': cliente})
+        #AGREGAMOS UN NUEVO CREDITO
+        query = text("INSERT INTO Credito(monto_pagado, monto_pendiente, total, id_cliente) VALUES (:monto_pagado, :monto_pendiente, :total, :id_cliente)")
+        db.execute(query, {'monto_pagado': 0, 'monto_pendiente': 0, 'total': 0, 'id_cliente': data['cliente']})
+        db.commit()
         
-        # Obtenemos el id del crédito
+        #recuperamos el id del ultimo credito
         query = text("SELECT id FROM Credito ORDER BY id DESC LIMIT 1")
         result = db.execute(query)
         id_credito = result.fetchone()[0]
-        print(f"Credito ID: {id_credito}")
         
-        # Validar que hay suficiente stock
-        for i in productos:
-            producto = obtener_codigo(i['producto'])
-            cantidad = i['cantidad']
-            query = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
-            result = db.execute(query, {'codigo': producto})
-            stock = result.fetchone()[0]
-            print(f"Producto: {producto}, Stock: {stock}, Cantidad requerida: {cantidad}")
-            if stock < cantidad:
-                db.rollback()  # Rollback en caso de error
-                return jsonify({'error': f'No hay suficiente stock para el producto {producto}'}), 400
-        
-        # Insertamos los detalles del crédito
-        for i in productos:
-            producto = obtener_codigo(i['producto'])
-            cantidad = i['cantidad']
+        #agregamos los detalles del credito
+        for producto in data['productos']:
+            codigoProducto = obtener_codigo(producto['producto'])
+            query = text("INSERT INTO DetalleCredito(cantidad, codigo_producto, id_credito) VALUES (:cantidad, :codigo_producto, :id_credito)")
+            db.execute(query, {'cantidad': producto['cantidad'], 'codigo_producto': codigoProducto, 'id_credito': id_credito})
+            db.commit()
             
-            # Insertamos el detalle del crédito
-            query = text("INSERT INTO DetalleCredito (cantidad, codigo_producto, id_credito) VALUES (:cantidad, :codigo_producto, :id_credito)")
-            db.execute(query, {'cantidad': cantidad, 'codigo_producto': producto, 'id_credito': id_credito})
-        
-        # Commit después de insertar todos los detalles
-        db.commit()
-        
-        # Total a Pagar
-        query = text("""
-                    SELECT SUM(dc.cantidad * p.precio_unitario) AS total_a_pagar
-                    FROM DetalleCredito dc
-                    JOIN Producto p ON dc.codigo_producto = p.codigo
-                    JOIN Credito c ON dc.id_credito = c.id
-                    WHERE c.id = :id_credito;
-                    """)
-        result = db.execute(query, {'id_credito': id_credito})
-        total_a_pagar = result.fetchone()[0]
-        print(f"Total a pagar: {total_a_pagar}")
-        
-        # Actualizamos el total del crédito
-        query = text("SELECT monto_pagado FROM Credito WHERE id = :id_credito")
-        result = db.execute(query, {'id_credito': id_credito})
-        monto_pagado = result.fetchone()[0]
-        
-        query = text("UPDATE Credito SET total = :total_a_pagar, monto_pendiente = :pendiente WHERE id = :id_credito")
-        db.execute(query, {'total_a_pagar': total_a_pagar, 'pendiente': total_a_pagar - monto_pagado, 'id_credito': id_credito})
-        
-        # Actualizamos la cantidad de productos en stock
-        for i in productos:
-            producto = obtener_codigo(i['producto'])
-            cantidad = i['cantidad']
-            query = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
-            result = db.execute(query, {'codigo': producto})
-            stock = result.fetchone()[0]
-            
-            query = text("UPDATE Producto SET cantidad = :cantidad WHERE codigo = :codigo")
-            db.execute(query, {'cantidad': stock - cantidad, 'codigo': producto})
-        
-        # Commit final
+            #recuperamos el precio unitario del producto
+            query = text("SELECT precio_unitario FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query, {'codigo': codigoProducto})
+            precio_unitario = result.fetchone()[0]
+            pendiente += (int(producto['cantidad']) * float(precio_unitario))
+
+        #actualizamos el total del credito
+        query = text("UPDATE Credito SET monto_pendiente = :monto_pendiente, total = :total WHERE id = :id")
+        db.execute(query, {'monto_pendiente': pendiente, 'total': pendiente, 'id': id_credito})
         db.commit()
         
         return jsonify({'message': 'Credito guardado correctamente'}), 200
     except Exception as e:
-        db.rollback()  # Aseguramos que todo se revierta en caso de error
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 

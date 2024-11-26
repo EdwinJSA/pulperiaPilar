@@ -69,19 +69,19 @@
     const addButton = document.getElementById("add-credit-button");
     const totalCredito = document.getElementById("credito-total");
     const guardarCredito = document.getElementById("btn-guardarCredito");
-    const listaProductos = [];
+    const listaProductos = []; // Aseguramos que esto sea siempre un array
     const inputNameCustomer = document.getElementById("nombreCliente");
-
+    
     input.addEventListener("input", () => {
         const query = input.value.toLowerCase();
         suggestions.innerHTML = "";
         suggestions.style.display = "none";
-
+    
         if (query) {
             const matches = options.filter(option =>
                 option.toLowerCase().includes(query)
             );
-
+    
             if (matches.length) {
                 matches.forEach(match => {
                     const li = document.createElement("li");
@@ -97,41 +97,47 @@
             }
         }
     });
-
+    
     document.addEventListener("click", (e) => {
         if (!suggestions.contains(e.target) && e.target !== input) {
             suggestions.style.display = "none";
         }
     });
-
+    
     const fechaInput = document.getElementById("fecha-credito");
     const hoy = new Date();
     const fechaActual = hoy.toISOString().split("T")[0];
     fechaInput.value = fechaActual;
-
+    
     addButton.addEventListener("click", () => {
         const product = input.value;
         const quantity = document.getElementById("cantidad").value;
         
         inputNameCustomer.disabled = true;
         guardarCredito.classList.remove("d-none");
-
+    
         if (product && quantity) {
             const isValidProduct = options.includes(product);
             if (!isValidProduct) {
                 alert("Por favor, seleccione un producto válido.");
                 return;
             }
-
+    
             const row = document.createElement("tr");
             row.innerHTML = `
                 <td>${product}</td>
                 <td>${quantity}</td>
             `;
             tableBody.appendChild(row);
-
-            listaProductos.push({ producto: product, cantidad: quantity });
-
+    
+            // Aseguramos que listaProductos sea siempre un array antes de agregar
+            if (Array.isArray(listaProductos)) {
+                listaProductos.push({ producto: product, cantidad: quantity });
+            } else {
+                console.error("listaProductos no es un array. Restableciendo...");
+                listaProductos.length = 0;
+                listaProductos.push({ producto: product, cantidad: quantity });
+            }
             input.value = "";
             document.getElementById("cantidad").value = "";
         } else {
@@ -139,11 +145,31 @@
                 icon: 'error',
                 title: 'Oops...',
                 text: 'Por favor, complete todos los campos.'
-            })
+            });
         }
     });
-
     guardarCredito.addEventListener("click", () => {
+        if (!listaProductos.length) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'No hay productos en la lista.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+    
+        const cliente = document.getElementById("nombreCliente").value;
+        if (!cliente) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'El nombre del cliente no puede estar vacío.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+            return;
+        }
+    
         fetch('/guardarCredito', {
             method: 'POST',
             headers: {
@@ -151,28 +177,35 @@
                 'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({
-                'cliente': document.getElementById("nombreCliente").value,
+                'cliente': cliente,
                 'productos': listaProductos
             })
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`Error en la respuesta del servidor: ${response.statusText}`);
+            }
+            return response.json();
         }).then(data => {
-                Swal.fire({
-                    title: 'Exito!',
-                    text: 'Credito guardado con exito',
-                    icon: 'success',
-                    confirmButtonText: 'Aceptar'
-                })
+            Swal.fire({
+                title: 'Exito!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
             })
-        })
-        .catch(error => {
+            .then(() => {
+                location.reload();
+            });
+        }).catch(error => {
             console.error('Error:', error);
             Swal.fire({
                 title: 'Error!',
-                text: error,
+                text: error.message,
                 icon: 'error',
                 confirmButtonText: 'Aceptar'
             });
         });
-
+    });
+    
 </script>
 
 <script
