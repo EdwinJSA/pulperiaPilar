@@ -42,9 +42,10 @@
                 <td>
                     <!-- Botón para abrir el modal de edición -->
                     <button class="btn btn-warning btn-sm" 
+                        id="btn-editar-proveedor"
                         data-bs-toggle="modal" 
                         data-bs-target="#modalEditar" 
-                        data-id="{{ proveedor.id.id }}" 
+                        data-id="{{ proveedor.id }}" 
                         data-nombres="{{ proveedor.nombres }}" 
                         data-apellidos="{{ proveedor.apellidos }}" 
                         data-empresa="{{ proveedor.empresa }}" 
@@ -53,9 +54,10 @@
                     </button>
                     <!-- Botón para eliminar -->
                     <button class="btn btn-danger btn-sm" 
+                        id="btn-eliminar-proveedor"
                         data-bs-toggle="modal" 
                         data-bs-target="#modalEliminar" 
-                        data-id="{{ vendedor.id }}">
+                        data-id="{{ proveedor.id }}">
                         Eliminar
                     </button>
                 </td>
@@ -66,10 +68,49 @@
     </div>
 </main>
 
+<!-- Modal de Editar Proveedor -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarLabel">Editar Proveedor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-editar-proveedor" method="POST">
+            <div class="mb-3">
+              <label for="id-proveedor" class="form-label">ID</label>
+              <input type="text" class="form-control" id="id-proveedor" disabled>
+            </div>
+            <div class="mb-3">
+              <label for="nombres" class="form-label">Nombres</label>
+              <input type="text" class="form-control" id="nombres" required>
+            </div>
+            <div class="mb-3">
+              <label for="apellidos" class="form-label">Apellidos</label>
+              <input type="text" class="form-control" id="apellidos" required>
+            </div>
+            <div class="mb-3">
+              <label for="empresa" class="form-label">Empresa</label>
+              <input type="text" class="form-control" id="empresa" required>
+            </div>
+            <div class="mb-3">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input type="text" class="form-control" id="telefono" required>
+            </div>
+            <button type="button" id="btn-guardarCambios-proveedor" class="btn btn-primary">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
 <!-- Modal para agregar vendedor -->
 <div class="modal fade" id="modalAgregar" tabindex="-1" aria-labelledby="modalAgregarLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="formAgregar">
+        <form id="formAgregar" method="POST">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalAgregarLabel">Agregar Vendedor</h5>
@@ -95,187 +136,163 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-primary" id="btn-guardar-proveedor">Guardar</button>
                 </div>
             </div>
         </form>
-    </div>
-</div>
-
-<!-- Modal para editar vendedor -->
-<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="formEditar">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalEditarLabel">Editar Vendedor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="idEditar">
-                    <div class="mb-3">
-                        <label for="nombresEditar" class="form-label">Nombres</label>
-                        <input type="text" class="form-control" id="nombresEditar" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="apellidosEditar" class="form-label">Apellidos</label>
-                        <input type="text" class="form-control" id="apellidosEditar" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="empresaEditar" class="form-label">Empresa</label>
-                        <input type="text" class="form-control" id="empresaEditar" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="telefonoEditar" class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" id="telefonoEditar" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal para confirmar eliminación -->
-<div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalEliminarLabel">Confirmar Eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                ¿Estás seguro de que deseas eliminar este vendedor?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button id="btnConfirmarEliminar" class="btn btn-danger">Eliminar</button>
-            </div>
-        </div>
     </div>
 </div>
 </main>
 
 <script>
-    document.getElementById('inputProvider').addEventListener('input', function() {
-        let query = this.value;
-    
-        fetch(`/buscar_proveedores?query=${query}`)
-            .then(response => response.json())
-            .then(data => {
-                let results = data.proveedores;
-                let tableBody = document.querySelector('#tabla-productos tbody');
-                tableBody.innerHTML = ''; // Limpiar los resultados anteriores
-    
-                results.forEach(proveedor => {
-                    let row = document.createElement('tr');
-                    row.classList.add('us_proveedor');
-                    row.innerHTML = `
-                        <td>${proveedor.id}</td>
-                        <td>${proveedor.nombres}</td>
-                        <td>${proveedor.apellidos}</td>
-                        <td>${proveedor.empresa}</td>
-                        <td>${proveedor.telefono}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#modalEditar" 
-                                    data-id="${proveedor.id}" 
-                                    data-nombres="${proveedor.nombres}" 
-                                    data-apellidos="${proveedor.apellidos}" 
-                                    data-empresa="${proveedor.empresa}" 
-                                    data-telefono="${proveedor.telefono}">
-                                Editar
-                            </button>
-                            <button class="btn btn-danger btn-sm" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#modalEliminar" 
-                                    data-id="${proveedor.id}">
-                                Eliminar
-                            </button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            })
-            .catch(error => console.error('Error:', error));
+    // Agregar un evento de clic a cada botón de editar
+document.querySelectorAll("#btn-editar-proveedor").forEach(button => {
+    button.addEventListener("click", function() {
+      // Obtener los datos del proveedor desde los atributos data-*
+      const idProveedor = this.getAttribute("data-id");
+      const nombres = this.getAttribute("data-nombres");
+      const apellidos = this.getAttribute("data-apellidos");
+      const empresa = this.getAttribute("data-empresa");
+      const telefono = this.getAttribute("data-telefono");
+  
+      // Rellenar el formulario del modal con los datos del proveedor
+      document.getElementById("id-proveedor").value = idProveedor;
+      document.getElementById("nombres").value = nombres;
+      document.getElementById("apellidos").value = apellidos;
+      document.getElementById("empresa").value = empresa;
+      document.getElementById("telefono").value = telefono;
     });
-//agregar vendedores
-document.getElementById('formAgregar').addEventListener('submit', function(event) {
-    event.preventDefault();
+  });
+  
+  // Manejo de la acción de guardar cambios (se puede agregar una llamada a una función de backend si es necesario)
+  document.getElementById("form-editar-proveedor").addEventListener("submit", function(event) {
+    event.preventDefault(); // Evita que el formulario se envíe de manera predeterminada
+    
+    const idProveedor = document.getElementById("id-proveedor").value;
+    const nombres = document.getElementById("nombres").value;
+    const apellidos = document.getElementById("apellidos").value;
+    const empresa = document.getElementById("empresa").value;
+    const telefono = document.getElementById("telefono").value;
+  
+    // Llamada al backend para guardar los cambios (aquí puedes hacer una solicitud AJAX, por ejemplo)
+    console.log("Proveedor Editado:", { idProveedor, nombres, apellidos, empresa, telefono });
+  
+    // Cerrar el modal
+    var modal = bootstrap.Modal.getInstance(document.getElementById('modalEditar'));
+    modal.hide();
+  });
+  
 
-    let nombres = document.getElementById('nombresAgregar').value;
-    let apellidos = document.getElementById('apellidosAgregar').value;
-    let empresa = document.getElementById('empresaAgregar').value;
-    let telefono = document.getElementById('telefonoAgregar').value;
+document.addEventListener("DOMContentLoaded", function () {
+  const btnGuardarCambios = document.getElementById("btn-guardarCambios-proveedor");
 
-    fetch('/agregar_vendedor', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ nombres, apellidos, empresa, telefono })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            alert(data.message);
-            location.reload(); // Recargar para ver el nuevo proveedor
-        } else {
-            alert('Hubo un error al agregar el proveedor');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-});
-//editar vendedor
-document.getElementById('formEditar').addEventListener('submit', function(event) {
-    event.preventDefault();
+  btnGuardarCambios.addEventListener("click", function () {
+    const idProveedor = document.getElementById("id-proveedor").value;
+    const nombres = document.getElementById("nombres").value;
+    const apellidos = document.getElementById("apellidos").value;
+    const empresa = document.getElementById("empresa").value;
+    const telefono = document.getElementById("telefono").value;
 
-    let id = document.getElementById('idEditar').value;
-    let nombres = document.getElementById('nombresEditar').value;
-    let apellidos = document.getElementById('apellidosEditar').value;
-    let empresa = document.getElementById('empresaEditar').value;
-    let telefono = document.getElementById('telefonoEditar').value;
-
-    fetch(`/editar_vendedor/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ nombres, apellidos, empresa, telefono })
+    fetch("/editar_proveedor", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: idProveedor,
+        nombres: nombres,
+        apellidos: apellidos,
+        empresa: empresa,
+        telefono: telefono,
+      }),
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            alert(data.message);
-            location.reload(); // Recargar para ver los cambios
-        } else {
-            alert('Hubo un error al editar el proveedor');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-});
-//eliminar vendedor
-document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
-    let id = document.getElementById('modalEliminar').dataset.id;
-
-    fetch(`/eliminar_vendedor/${id}`, {
-        method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            alert(data.message);
-            location.reload(); // Recargar para quitar el proveedor de la lista
-        } else {
-            alert('Hubo un error al eliminar el proveedor');
-        }
-    })
-    .catch(error => console.error('Error:', error));
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Proveedor actualizado:", data);
+        // Realizar acciones adicionales después de guardar los cambios
+        Swal.fire({
+          title: "Éxito",
+          text: "Los cambios se guardaron exitosamente.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        }).then( () => {
+            location.reload();
+        })
+      })
+      .catch((error) => {
+        console.error("Error al guardar los cambios:", error);
+      });
+  });
 });
 
+
+document.addEventListener("DOMContentLoaded", function () {
+    const btnGuardarProveedor = document.getElementById("btn-guardar-proveedor");
+
+    btnGuardarProveedor.addEventListener("click", function () {
+        const nombres = document.getElementById("nombresAgregar").value;
+        const apellidos = document.getElementById("apellidosAgregar").value;
+        const empresa = document.getElementById("empresaAgregar").value;
+        const telefono = document.getElementById("telefonoAgregar").value;
+
+        fetch("/agregar_proveedor", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nombres: nombres,
+                apellidos: apellidos,
+                empresa: empresa,
+                telefono: telefono,
+            }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Proveedor agregado:", data);
+            // Realizar acciones adicionales después de guardar el proveedor
+            Swal.fire({
+                title: "Éxito",
+                text: "Proveedor agregado exitosamente.",
+                icon: "success",
+                confirmButtonText: "Aceptar",
+            }).then(() => {
+                location.reload();
+            });
+        })
+        .catch((error) => {
+            console.error("Error al agregar el proveedor:", error);
+        });
+    });
+})
+
+
+window.onload = function () {
+  const btnEliminar = document.getElementById("btn-eliminar-proveedor");
+
+  btnEliminar.addEventListener("click", function () {
+    const idProveedor = this.getAttribute("data-id");
+
+    fetch(`/eliminar_proveedor/${idProveedor}`, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Proveedor eliminado:", data);
+        // Realizar acciones adicionales después de eliminar el proveedor
+        Swal.fire({
+          title: "Éxito",
+          text: "Proveedor eliminado exitosamente.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        }).then(() => {
+          location.reload();
+        });
+      })
+      .catch((error) => {
+        console.error("Error al eliminar el proveedor:", error);
+      });
+  });
+}
 </script>
 {% endblock %}

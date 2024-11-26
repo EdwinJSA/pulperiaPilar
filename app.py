@@ -142,7 +142,7 @@ def verCredito():
 @app.route('/clientes')
 def clientes():
     try:
-        query = text("SELECT * FROM Cliente")
+        query = text("SELECT * FROM Cliente GROUP BY id")
         result = db.execute(query)
         clientes = result.fetchall()
         return render_template('clientes.html', clientes=clientes)
@@ -594,20 +594,6 @@ def editar_vendedor(id):
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-# Ruta para eliminar un vendedor
-@app.route('/eliminar_proveedor/<int:id>', methods=['DELETE'])
-def eliminar_proveedor(id):
-    try:
-        query = text("DELETE FROM Proveedor WHERE id = :id")
-        result = db.execute(query, {'id': id})
-        db.commit()  # Asegúrate de confirmar la transacción
-        if result.rowcount > 0:  # Verifica si algún registro fue eliminado
-            return jsonify({'message': 'Vendedor eliminado correctamente'}), 200
-        else:
-            return jsonify({'error': 'El proveedor no fue encontrado'}), 404
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
     
 @app.route('/creditoCliente', methods=['POST'])
 def creditoCliente():
@@ -787,6 +773,71 @@ def buscar_por_proveedor():
 
 
 
+@app.route('/editar_proveedor', methods=['PUT'])
+def editar_proveedor():
+    if request.method == 'PUT':
+        data = request.json
+        id = data['id']
+        nombre = data['nombres']
+        apellidos = data['apellidos']
+        empresa = data['empresa']
+        telefono = data['telefono']
+
+        query = text("""
+            UPDATE Proveedor
+            SET nombres = :nombres, apellidos = :apellidos, empresa = :empresa, telefono = :telefono
+            WHERE id = :id
+        """)
+        
+        db.execute(query, {'id': id, 'nombres': nombre, 'apellidos': apellidos, 'empresa': empresa, 'telefono': telefono})
+        db.commit()
+        
+        return jsonify({'success': True, 'message': 'Proveedor actualizado correctamente'}), 200
+    
+    return jsonify({'error': 'Metodo no permitido'}), 405
+
+
+@app.route('/agregar_proveedor', methods=['POST'])
+def agregar_proveedor():
+    if request.method == 'POST':
+        data = request.json
+        
+        nombre = data['nombres']
+        apellidos = data['apellidos']
+        empresa = data['empresa']
+        telefono = data['telefono']
+
+        #imprimir los datos
+        print("================================")
+        print(nombre)
+        print(apellidos)
+        print(empresa)
+        print(telefono)
+        print("================================")
+        
+        query = text("""
+            INSERT INTO Proveedor (nombres, apellidos, empresa, telefono)
+            VALUES (:nombres, :apellidos, :empresa, :telefono)
+        """)
+        
+        db.execute(query, {'nombres': nombre, 'apellidos': apellidos, 'empresa': empresa, 'telefono': telefono})
+        db.commit()
+        
+        return jsonify({'success': True, 'message': 'Proveedor agregado correctamente'}), 201
+    
+    return jsonify({'error': 'Metodo no permitido'}), 405
+
+
+@app.route('/eliminar_proveedor/<int:id>', methods=['DELETE'])
+def eliminar_proveedor(id):
+    if request.method == 'DELETE':
+        query = text("DELETE FROM Proveedor WHERE id = :id")
+        db.execute(query, {'id': id})
+        db.commit()
+        
+        return jsonify({'success': True, 'message': 'Proveedor eliminado correctamente'}), 200
+    
+    return jsonify({'error': 'Metodo no permitido'}), 405
 
 if __name__ == '__main__':
     app.run(debug=True)
