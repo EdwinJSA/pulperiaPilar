@@ -22,7 +22,18 @@
 
 
     {% if boucher %}
-    <div class="boucher">
+  <div class="card" style="margin-top: 20px;">
+    <div class="card-body">
+      <h5 class="card-title">Se agregó el cliente</h5>
+      <div class="datosCliente">
+        <p class="card-text">ID Cliente: {{ datos.id }}</p>
+        <p class="card-text">Nombre: {{ datos.nombres }}</p>
+        <p class="card-text">Apellido: {{ datos.apellidos }}</p>
+        <p class="card-text">Celular: {{ datos.telefono }}</p>
+      </div>
+    </div>
+  </div>
+    <!--<div class="boucher">
         <div class="confirmacion">
             <span>Cliente agregado con exito</span>
             <div class="datosCliente">
@@ -32,7 +43,7 @@
                 <p>celular: {{ datos.telefono }}</p>
             </div>
         </div>
-    </div>
+    </div>-->
     {% endif %}
     
 </main>
