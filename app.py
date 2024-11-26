@@ -331,12 +331,11 @@ def proveedores():
         query = text("SELECT * FROM Proveedor")
         result = db.execute(query)
         proveedores = result.fetchall()
-        # Convertir los resultados en una lista de diccionarios
-        proveedores = [dict(proveedor) for proveedor in proveedores]
+        # Convertir los resultados en una lista de diccionarios si es necesario
         return render_template('proveedores.html', proveedores=proveedores)
     except Exception as e:
         traceback.print_exc()
-    return render_template('proveedores.html')
+        return render_template('proveedores.html', proveedores=[])
 
 @app.route('/consumido')
 def consumido():
@@ -540,7 +539,7 @@ def buscar_proveedores():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/agregar_vendedor', methods=['POST'])
+@app.route('/agregar_proveedor', methods=['POST'])
 def agregar_vendedor():
     try:
         data = request.get_json()
@@ -583,13 +582,16 @@ def editar_vendedor(id):
         return jsonify({'error': str(e)}), 500
 
 # Ruta para eliminar un vendedor
-@app.route('/eliminar_vendedor/<int:id>', methods=['DELETE'])
-def eliminar_vendedor(id):
+@app.route('/eliminar_proveedor/<int:id>', methods=['DELETE'])
+def eliminar_proveedor(id):
     try:
         query = text("DELETE FROM Proveedor WHERE id = :id")
-        db.execute(query, {'id': id})
-        db.commit()
-        return jsonify({'message': 'Vendedor eliminado correctamente'}), 200
+        result = db.execute(query, {'id': id})
+        db.commit()  # Asegúrate de confirmar la transacción
+        if result.rowcount > 0:  # Verifica si algún registro fue eliminado
+            return jsonify({'message': 'Vendedor eliminado correctamente'}), 200
+        else:
+            return jsonify({'error': 'El proveedor no fue encontrado'}), 404
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500

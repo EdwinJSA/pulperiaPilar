@@ -238,6 +238,20 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+//busqueda de clientes
+document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('keyup', e => {
+    if (e.target.matches("#inputProvider")) {
+      if (e.key === 'Escape') e.target.value = '';
+      document.querySelectorAll('.us_proveedor').forEach(proveedor => {
+        proveedor.textContent.toLowerCase().includes(e.target.value.toLowerCase())
+          ? proveedor.classList.remove('d-none')
+          : proveedor.classList.add('d-none');
+      });
+    }
+  });
+});
+
 //busqueda de proveedores
 document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('keyup', e => {
@@ -349,4 +363,15 @@ abono.addEventListener('click', () => {
       location.reload();
     });
   })
-})
+});
+
+// Obtener el botón de confirmación de eliminación
+const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+let idProveedorAEliminar = null;
+
+// Configurar el botón de eliminar en el modal
+document.querySelectorAll('.btn-danger[data-bs-target="#modalEliminar"]').forEach(button => {
+    button.addEventListener('click', function () {
+        idProveedorAEliminar = this.getAttribute('data-id');
+    });
+});
