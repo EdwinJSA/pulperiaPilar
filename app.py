@@ -155,7 +155,6 @@ def clientes():
 def guardar_producto():
     try:
         data = json.loads(request.data)
-        print("====================================")
         total = float(data['total'])
         print(total)
         # print(data['productos'])
@@ -169,12 +168,31 @@ def guardar_producto():
         print(id_venta)
         producto = data['productos'][0]
         print(producto.keys())
+        print(producto['name'])
+        print(producto['quantity'])
+        print(producto['price'])
 
-        #dict_keys(['name', 'quantity', 'price'])
         for producto in data['productos']:
+            # Validamos que hayan suficientes productos en stock
+            query = text("SELECT cantidad FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query, {'codigo': producto['name']})
+            cantidad_en_stock = result.fetchone()  # Llamada única a fetchone()
+
+            if cantidad_en_stock is None:
+                return jsonify({'error': f"El producto '{producto['name']}' no existe en el inventario"}), 400
+
+            stock = int(cantidad_en_stock[0])  # Extraemos la cantidad de stock del resultado
+            print(f"Stock disponible para {producto['name']}: {stock} (tipo: {type(stock)})")
+            print(f"Cantidad solicitada: {producto['quantity']} (tipo: {type(producto['quantity'])})")
+
+            if stock < producto['quantity']:
+                return jsonify({'error': f"No hay suficiente stock para el producto '{producto['name']}'"}), 400
+
+            # Insertamos el detalle de la venta
             query = text("INSERT INTO DetalleContado(cantidad, codigo_producto, id_contado) VALUES (:cantidad, :codigo_producto, :id_contado)")
             db.execute(query, {'cantidad': producto['quantity'], 'codigo_producto': producto['name'], 'id_contado': id_venta})
             db.commit()
+
 #articulo
 
         return jsonify({'message': 'Producto guardado correctamente'}), 200
@@ -566,7 +584,7 @@ def creditoCliente():
             INNER JOIN 
                 Cliente ON Credito.id_cliente = Cliente.id
             WHERE 
-                Cliente.id = :id_cliente;
+                Cliente.id = :id_cliente AND monto_pendiente > 0;
         """)
         
         # Ejecutar la consulta
@@ -595,6 +613,18 @@ def abonarCreditoCliente():
         id_credito = data['credito_id']
         monto_abonado = data['monto_abonar']
         
+        #revisamos si el monto abonado es mayor al monto pendiente
+        query = text("""
+            SELECT monto_pendiente
+            FROM Credito
+            WHERE id = :id_credito
+        """)
+        result = db.execute(query, {'id_credito': id_credito})
+        monto_pendiente = result.fetchone()[0]
+        
+        if (float(monto_abonado) > float(monto_pendiente)):
+            return jsonify({'error': 'El monto a abonar es mayor al monto pendiente'}), 400
+        
         query = text("""
             UPDATE Credito
             SET monto_pendiente = monto_pendiente - :monto_abonado
@@ -621,7 +651,6 @@ def verProductosCredito():
     if request.method == 'POST':
         data = request.json
         credito_id = data['credito_id']
-        print("CREDITO ID:", credito_id)
         
         query = text("""
             SELECT p.nombre

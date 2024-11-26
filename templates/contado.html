@@ -152,7 +152,23 @@
                     productos: productosSeleccionados
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    // Si el estado es 400, mostrar mensaje de error del servidor
+                    if (response.status === 400) {
+                        return response.json().then(errorData => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error al guardar',
+                                text: errorData.error || 'Error desconocido.'
+                            });
+                            throw new Error(errorData.error || 'Error 400');
+                        });
+                    }
+                    throw new Error('Error al procesar la solicitud.');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.message) {
                     Swal.fire({
@@ -170,14 +186,20 @@
             })
             .catch(error => {
                 console.error("Error al guardar la venta:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error al guardar',
-                    text: 'Hubo un error al guardar la venta. Intenta de nuevo.'
-                });
-            });
+                // Este bloque solo se activa para errores fuera de 400
+                if (!error.message.includes('Error 400')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al guardar',
+                        text: 'No hay suficiente producto en Stock.'
+                    }).then(() => {
+                        location.reload();
+                    });
+                }
+            })
         });
     });
 </script>
+
 
 {% endblock  %}
