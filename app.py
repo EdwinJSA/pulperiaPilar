@@ -203,26 +203,52 @@ def guardar_producto():
 @app.route('/actualizar_producto', methods=['POST'])
 def editar_producto():
     try:
+        # Validar método HTTP
+        if request.method != 'POST':
+            return jsonify({'error': 'Método no permitido'}), 405
+        
+        # Cargar datos del request
         data = json.loads(request.data)
-        print(data.keys())
+
+        # Validar presencia de campos
+        required_fields = ['codigo', 'nombre', 'precio', 'cantidad', 'categoria', 'descripcion']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({'error': f'Faltan los campos: {", ".join(missing_fields)}'}), 400
+
+        # Asignar valores
         codigo = data['codigo']
         nombre = data['nombre']
-        precio_unitario = data['precio']
-        cantidad = data['cantidad']
+        precio_unitario = float(data['precio'])  # Aseguramos que sea numérico
+        cantidad = int(data['cantidad'])        # Aseguramos que sea numérico
         categoria = data['categoria']
         descripcion = data['descripcion']
-        
-        print(codigo, nombre, precio_unitario, cantidad, categoria, descripcion)
 
-        query = text("UPDATE Producto SET nombre = :nombre, precio_unitario = :precio_unitario, cantidad = :cantidad, categoria = :categoria, descripcion = :descripcion WHERE codigo = :codigo")
-        db.execute(query, {'codigo': codigo, 'nombre': nombre, 'precio_unitario': precio_unitario, 'cantidad': cantidad, 'categoria': categoria, 'descripcion': descripcion})
+        # Actualizar en la base de datos
+        query = text("""
+            UPDATE Producto
+            SET nombre = :nombre, precio_unitario = :precio_unitario, cantidad = :cantidad, categoria = :categoria, descripcion = :descripcion
+            WHERE codigo = :codigo
+        """)
+        db.execute(query, {
+            'nombre': nombre,
+            'precio_unitario': precio_unitario,
+            'cantidad': cantidad,
+            'categoria': categoria,
+            'descripcion': descripcion,
+            'codigo': codigo
+        })
         db.commit()
-        return jsonify({'message': 'Producto actualizado correctamente'}), 200
+
+        return jsonify({'success': True, 'message': 'Producto actualizado correctamente'}), 200
+
+    except ValueError as ve:
+        return jsonify({'error': f'Error en el formato de los datos: {str(ve)}'}), 400
     except Exception as e:
         traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error interno del servidor'}), 500
 
-@app.route('/eliminar_producto/<int:id>', methods=['DELETE'])
+@app.route('/eliminar_producto/<string:id>', methods=['DELETE'])
 def eliminar_producto(id):
     try:
         print(f"Eliminando producto con ID: {id}")
@@ -670,6 +696,38 @@ def verProductosCredito():
         return jsonify({'productos': productos}), 200
     
     return jsonify({'error': 'Metodo no permitido'}), 405
+
+@app.route('/agregar_nuevo_producto', methods=['POST'])
+def agregar_nuevo_producto():
+    try:
+        data = json.loads(request.data)
+
+        # Validar campos requeridos
+        required_fields = ['codigo', 'nombre', 'precio', 'cantidad', 'categoria', 'descripcion']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({'error': f'Campo {field} es obligatorio'}), 400
+
+        # Insertar en la base de datos
+        query = text("""
+            INSERT INTO Producto (codigo, nombre, precio_unitario, cantidad, categoria, descripcion)
+            VALUES (:codigo, :nombre, :precio_unitario, :cantidad, :categoria, :descripcion)
+        """)
+        db.execute(query, {
+            'codigo': data['codigo'],
+            'nombre': data['nombre'],
+            'precio_unitario': float(data['precio']),
+            'cantidad': int(data['cantidad']),
+            'categoria': data['categoria'],
+            'descripcion': data['descripcion']
+        })
+        db.commit()
+
+        return jsonify({'success': True, 'message': 'Producto agregado correctamente'}), 201
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': 'Error al agregar el producto'}), 500
+
 
 
 if __name__ == '__main__':
