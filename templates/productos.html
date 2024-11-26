@@ -11,13 +11,14 @@
                 <input type="text" class="form-control" id="inputProduct" placeholder="Ingrese el producto">
               </div>
           </form>
-          
-          <!-- Botón Agregar Producto -->
-          <button class="btn btn-success" id="btn-agregar" data-bs-toggle="modal" data-bs-target="#modalAgregarProducto">
-              <i class="fi fi-rr-add"></i> Agregar Producto
-          </button>
+          <div class="d-flex justify-content-between align-items-center">
+              <button type="button" class="btn btn-primary" id="btnAgregarProducto">
+                  Agregar Producto
+              </button>
+          </div>
       </div>
     </div>
+
   
     <div class="table-container" id="tabla-productos" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc;">
       <table class="table table-striped table-hover">
@@ -60,36 +61,7 @@
           </tbody>
       </table>
     </div>
-    <div class="modal fade" id="modalAgregarProducto" tabindex="-1" aria-labelledby="modalAgregarProductoLabel" aria-hidden="true">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="modalAgregarProductoLabel">Agregar Producto</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                  <form id="form-agregar-producto">
-                      <div class="mb-3">
-                          <label for="codigo" class="form-label">Código</label>
-                          <input type="text" class="form-control" id="codigo" name="codigo" required>
-                      </div>
-                      <div class="mb-3">
-                          <label for="nombre" class="form-label">Nombre</label>
-                          <input type="text" class="form-control" id="nombre" name="nombre" required>
-                      </div>
-                      <div class="mb-3">
-                          <label for="categoria" class="form-label">Categoría</label>
-                          <input type="text" class="form-control" id="categoria" name="categoria">
-                      </div>
-                      <div class="mb-3">
-                          <label for="descripcion" class="form-label">Descripción</label>
-                          <textarea class="form-control" id="descripcion" name="descripcion"></textarea>
-                      </div>
-                      <button type="button" id="btn-agregar-producto" class="btn btn-primary">Agregar Producto</button>
-                  </form>
-              </div>
-          </div>
-      </div>
+
     <!-- Modal de Editar Producto -->
     <div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-labelledby="modalEditarProductoLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -100,7 +72,10 @@
               </div>
               <div class="modal-body">
                   <form id="form-editar-producto">
-                      <input type="hidden" id="codigo-editar" name="codigo"> <!-- Código del producto (no editable) -->
+                      <div class="mb-3">
+                          <label for="codigo-editar" class="form-label">Código</label>
+                          <input type="text" class="form-control" id="codigo-editar" name="codigo" disabled> <!-- Código deshabilitado -->
+                      </div>
                       <div class="mb-3">
                           <label for="nombre-editar" class="form-label">Nombre</label>
                           <input type="text" class="form-control" id="nombre-editar" name="nombre" required>
@@ -111,15 +86,15 @@
                       </div>
                       <div class="mb-3">
                           <label for="cantidad-editar" class="form-label">Cantidad</label>
-                          <input type="number" class="form-control" id="cantidad-editar" name="cantidad" disabled> <!-- Cantidad no editable -->
+                          <input type="number" class="form-control" id="cantidad-editar" name="cantidad" required disabled>
                       </div>
                       <div class="mb-3">
                           <label for="categoria-editar" class="form-label">Categoría</label>
-                          <input type="text" class="form-control" id="categoria-editar" name="categoria">
+                          <input type="text" class="form-control" id="categoria-editar" name="categoria" required>
                       </div>
                       <div class="mb-3">
                           <label for="descripcion-editar" class="form-label">Descripción</label>
-                          <textarea class="form-control" id="descripcion-editar" name="descripcion"></textarea>
+                          <textarea class="form-control" id="descripcion-editar" name="descripcion" required></textarea>
                       </div>
                       <button type="button" id="btn-actualizar-producto" class="btn btn-primary">Actualizar Producto</button>
                   </form>
@@ -127,144 +102,207 @@
           </div>
       </div>
     </div>
-  </main>
-  
-  <script>
-      // Acción del botón para actualizar producto
-      const btnActualizarProducto = document.getElementById('btn-actualizar-producto');
-      if (btnActualizarProducto) {
+
+    <!-- Modal de Agregar Producto -->
+<div class="modal fade" id="modalAgregarProducto" tabindex="-1" aria-labelledby="modalAgregarProductoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="modalAgregarProductoLabel">Agregar Producto</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <form id="form-agregar-producto">
+                  <div class="mb-3">
+                      <label for="codigo-agregar" class="form-label">Código</label>
+                      <input type="text" class="form-control" id="codigo-agregar" name="codigo" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="nombre-agregar" class="form-label">Nombre</label>
+                      <input type="text" class="form-control" id="nombre-agregar" name="nombre" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="precio-agregar" class="form-label">Precio Unitario</label>
+                      <input type="number" class="form-control" id="precio-agregar" name="precio" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="cantidad-agregar" class="form-label">Cantidad</label>
+                      <input type="number" class="form-control" id="cantidad-agregar" name="cantidad" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="categoria-agregar" class="form-label">Categoría</label>
+                      <input type="text" class="form-control" id="categoria-agregar" name="categoria" required>
+                  </div>
+                  <div class="mb-3">
+                      <label for="descripcion-agregar" class="form-label">Descripción</label>
+                      <textarea class="form-control" id="descripcion-agregar" name="descripcion" required></textarea>
+                  </div>
+                  <button type="button" id="btn-guardar-producto" class="btn btn-success">Guardar Producto</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const botonesEditar = document.querySelectorAll('.btn-editar');
+
+    botonesEditar.forEach(boton => {
+        boton.addEventListener('click', function () {
+            const { codigo, nombre, precio, cantidad, categoria, descripcion } = boton.dataset;
+
+            // Asignar valores al modal
+            document.getElementById('codigo-editar').value = codigo;
+            document.getElementById('nombre-editar').value = nombre;
+            document.getElementById('precio-editar').value = precio;
+            document.getElementById('cantidad-editar').value = cantidad;
+            document.getElementById('categoria-editar').value = categoria;
+            document.getElementById('descripcion-editar').value = descripcion;
+
+            // Mostrar modal
+            const modalEditarProducto = new bootstrap.Modal(document.getElementById('modalEditarProducto'));
+            modalEditarProducto.show();
+        });
+    });
+
+    const btnActualizarProducto = document.getElementById('btn-actualizar-producto');
+    if (btnActualizarProducto) {
         btnActualizarProducto.addEventListener('click', function (event) {
-          event.preventDefault();
-    
-          // Obtener los valores actualizados desde el modal
-          const codigo = document.getElementById('codigo-editar').value;
-          const nombre = document.getElementById('nombre-editar').value;
-          const precio = document.getElementById('precio-editar').value;
-          const cantidad = document.getElementById('cantidad-editar').value;  
-          const categoria = document.getElementById('categoria-editar').value;
-          const descripcion = document.getElementById('descripcion-editar').value;
-    
-          // Validar campos requeridos
-          if (!codigo || !nombre || !precio) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Campos Requeridos',
-              text: 'Por favor complete todos los campos obligatorios.',
-            });
-            return;
-          }
-    
-          // Enviar datos al servidor mediante fetch
-          fetch('/actualizar_producto', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              'codigo': codigo,
-              'nombre': nombre,
-              'precio': precio,
-              'cantidad': cantidad,
-              'categoria': categoria,
-              'descripcion': descripcion
+            event.preventDefault();
+
+            const codigo = document.getElementById('codigo-editar').value;
+            const nombre = document.getElementById('nombre-editar').value;
+            const precio = parseFloat(document.getElementById('precio-editar').value);
+            const cantidad = parseInt(document.getElementById('cantidad-editar').value, 10);
+            const categoria = document.getElementById('categoria-editar').value;
+            const descripcion = document.getElementById('descripcion-editar').value;
+
+            if (!codigo || !nombre || isNaN(precio) || isNaN(cantidad) || !categoria || !descripcion) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos Requeridos',
+                    text: 'Por favor complete todos los campos obligatorios.',
+                });
+                return;
+            }
+
+            fetch('/actualizar_producto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ codigo, nombre, precio, cantidad, categoria, descripcion })
             })
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              Swal.fire({
-                title: 'Éxito!',
-                text: 'Producto actualizado correctamente.',
-                icon: 'success',
-                confirmButtonText: 'Aceptar'
-              }).then(() => {
-                location.reload();
-              });
-            } else {
-              Swal.fire({
-                title: 'Error',
-                text: 'Hubo un error al actualizar el producto: ' + data.error,
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
-              });
-            }
-          })
-          .catch(error => {
-            Swal.fire({
-              title: 'Error',
-              text: 'Ocurrió un error al intentar actualizar el producto.',
-              icon: 'error',
-              confirmButtonText: 'Aceptar'
-            });
-          });
-        });
-      }
-    });
-    
-      document.getElementById('btn-agregar-producto').addEventListener('click', function() {
-        // Obtener los valores de los campos del formulario
-        const codigo = document.getElementById('codigo').value;
-        const nombre = document.getElementById('nombre').value;
-        const categoria = document.getElementById('categoria').value;
-        const descripcion = document.getElementById('descripcion').value;
-    
-        // Validar que los campos obligatorios estén llenos
-        if (!codigo || !nombre) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Campos Requeridos',
-                text: 'Por favor, complete los campos Código y Nombre.',
-            });
-            return;
-        }
-    
-        // Crear el objeto de datos para enviar
-        const data = {
-            codigo: codigo,
-            nombre: nombre,
-            categoria: categoria,
-            descripcion: descripcion
-        };
-    
-        // Realizar la solicitud AJAX
-        fetch('/agregar_producto', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                // Mostrar mensaje de éxito con SweetAlert
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Producto Agregado',
-                    text: data.message,
-                    confirmButtonText: 'Aceptar'
-                }).then(() => {
-                    location.reload();  // Recargar la página para actualizar la lista de productos
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Éxito!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.error || 'Hubo un problema al actualizar el producto.',
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    }
+                })
+                .catch(() => {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Ocurrió un error al intentar actualizar el producto.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
                 });
-            } else {
-                // Mostrar mensaje de error con SweetAlert
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error al agregar el producto: ' + data.error,
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un error al intentar agregar el producto.',
-            });
         });
-    });
-            
-    </script>
-    
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Mostrar modal al hacer clic en "Agregar Producto"
+  const btnAgregarProducto = document.getElementById('btnAgregarProducto');
+  if (btnAgregarProducto) {
+      btnAgregarProducto.addEventListener('click', function () {
+          const modalAgregarProducto = new bootstrap.Modal(document.getElementById('modalAgregarProducto'));
+          modalAgregarProducto.show();
+      });
+  }
+
+  // Manejo del botón "Guardar Producto"
+  const btnGuardarProducto = document.getElementById('btn-guardar-producto');
+  if (btnGuardarProducto) {
+      btnGuardarProducto.addEventListener('click', function (event) {
+          event.preventDefault();
+
+          // Obtener valores del formulario
+          const codigo = document.getElementById('codigo-agregar').value;
+          const nombre = document.getElementById('nombre-agregar').value;
+          const precio = parseFloat(document.getElementById('precio-agregar').value);
+          const cantidad = parseInt(document.getElementById('cantidad-agregar').value, 10);
+          const categoria = document.getElementById('categoria-agregar').value;
+          const descripcion = document.getElementById('descripcion-agregar').value;
+
+          // Validar campos requeridos
+          if (!codigo || !nombre || isNaN(precio) || isNaN(cantidad) || !categoria || !descripcion) {
+              Swal.fire({
+                  icon: 'warning',
+                  title: 'Campos Requeridos',
+                  text: 'Por favor complete todos los campos obligatorios.',
+              });
+              return;
+          }
+
+          // Enviar datos al servidor
+          fetch('/agregar_nuevo_producto', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ codigo, nombre, precio, cantidad, categoria, descripcion })
+          })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      Swal.fire({
+                          title: 'Éxito!',
+                          text: 'Producto agregado correctamente.',
+                          icon: 'success',
+                          confirmButtonText: 'Aceptar'
+                      }).then(() => {
+                          location.reload(); // Recargar la página para reflejar el nuevo producto
+                      });
+                  } else {
+                      Swal.fire({
+                          title: 'Error',
+                          text: data.error || 'Hubo un problema al agregar el producto.',
+                          icon: 'error',
+                          confirmButtonText: 'Aceptar'
+                      });
+                  }
+              })
+              .catch(() => {
+                  Swal.fire({
+                      title: 'Error',
+                      text: 'Ocurrió un error al intentar agregar el producto.',
+                      icon: 'error',
+                      confirmButtonText: 'Aceptar'
+                  });
+              });
+      });
+  }
+});
+
+</script>
+
 {% endblock %}
