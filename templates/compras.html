@@ -2,112 +2,44 @@
 {% block content %}
 <main class="container my-5 p-4 rounded" style="background-color: #d1dd94; padding: 20px; border-radius: 8px; margin-top: 20px;">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <!-- Título alineado a la izquierda -->
-    <p class="text-start fs-2 mb-0" style="color: #789342; font-weight: 600;">Buscar Por:</p>
-
     <!-- Botón de Agregar Compra alineado a la derecha -->
     <button id="agregarCompraBtn" class="btn btn-success btn-lg px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalAgregarCompra" style="background-color: #5cb85c; border-color: #4cae4c; color: white; font-size: 1.2rem; font-weight: 600;">
-        <i class="bi bi-cart-plus"></i> Agregar Compra
+        <i class="bi bi-cart-plus text-end"></i> Agregar Compra
     </button>
   </div>
 
-  <!-- Opciones de búsqueda -->
-  <div class="mb-4">
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="flexRadioDefault" id="vendedor">
-      <label class="form-check-label" for="vendedor" style="color:#3d3d3d;">
-        <strong>Vendedor</strong>
-      </label>
-    </div>
-
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="flexRadioDefault" id="fecha" checked>
-      <label class="form-check-label" for="fecha" style="color:#3d3d3d;">
-        <strong>Fecha</strong>
-      </label>
-    </div>
-
-    <div class="form-check form-check-inline">
-      <input class="form-check-input" type="radio" name="flexRadioDefault" id="producto">
-      <label class="form-check-label" for="producto" style="color: #3d3d3d;">
-        <strong>Producto</strong>
-      </label>
-    </div>
-  </div>
 
   <!-- Contenedores dinámicos -->
-  <div class="container-fluid" style="margin-top: 20px;" id="PorVendedor">
-    <div class="mb-3">
-      <select class="form-select" aria-label="Seleccione el Vendedor">
-        <option selected>Seleccione el Vendedor:</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
-      </select>
-    </div>
-    <table class="table">
-      <thead class="table-dark">
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Producto</th>
-          <th scope="col">Cantidad</th>
-          <th scope="col">Total</th>
-        </tr>
-      </thead>
-    </table>
-  </div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Título alineado a la izquierda -->
+    <p class="text-start fs-2 mb-0" style="color: #789342; font-weight: 600;">Buscar por Proveedor:</p>
+</div>
 
-  <div class="container-fluid" style="margin-top: 20px;" id="PorFecha">
-    <div class="mb-3">
-      <label class="form-label text-center" style="color:#3d3d3d;">Seleccione en un rango de fecha:</label>
-      <div class="input-group">
-        <span class="input-group-text">De:</span>
-        <input type="date" class="form-control" aria-label="Fecha de inicio">
-        <span class="input-group-text">A</span>
-        <input type="date" class="form-control" aria-label="Fecha de fin">
-        <button class="btn btn-primary" type="button">
-          <i class="bi bi-search"></i>
-        </button>
-      </div>
-    </div>
-    <table class="table">
+<!-- Búsqueda por proveedor -->
+<div class="mb-3">
+  <select name="cliente" id="nombreProveedorC" class="form-select">
+      <option value="">seleccione un proveedor</option>
+      {% for proveedor in proveedores %}
+      <option value="{{ proveedor.nombre }}">{{ proveedor.nombre }} {{ proveedor.apellido }}</option>
+      {% endfor %}
+  </select>
+</div>
+
+  <table class="table" id="tablaResultados">
       <thead class="table-dark">
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Producto</th>
-          <th scope="col">Cantidad</th>
-          <th scope="col">Total</th>
-        </tr>
-      </thead>
-    </table>
-  </div>
-  
-  <div class="container-fluid" style="margin-top: 20px;" id="PorProducto">
-    <form class="row g-2 align-items-center">
-      <div class="col-auto">
-        <label for="inputProduct" class="form-label mb-0" style="color:#3d3d3d;">Producto a buscar: </label>
-      </div>
-      <div class="col-auto">
-        <input type="text" class="form-control" id="inputProduct" placeholder="Ingrese el producto">
-      </div>
-    </form>
-    <table class="table mt-3">
-      <thead class="table-dark">
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Producto</th>
-          <th scope="col">Cantidad</th>
-          <th scope="col">Total</th>
-        </tr>
+          <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Cantidad</th>
+              <th scope="col">Total</th>
+          </tr>
       </thead>
       <tbody>
-        <!-- Aquí se pueden agregar las filas de la tabla dinámicamente -->
+          <!-- Los resultados de la búsqueda se agregarán aquí -->
       </tbody>
-    </table>
-  </div>
+  </table>
+</div>
 
   <!-- Modal de Agregar Compra -->
   <div class="modal fade" id="modalAgregarCompra" tabindex="-1" aria-labelledby="modalAgregarCompraLabel" aria-hidden="true">
@@ -220,6 +152,7 @@
   const suggestions = document.getElementById("suggestions");
   const productosAgregados = [];
   const lista = document.getElementById("productos-agregados");
+  const inputNameCustomer = document.getElementById("nombreProveedorC");
   
   // Manejo del autocompletado de productos
   input.addEventListener("input", () => {
