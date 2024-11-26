@@ -99,8 +99,23 @@ def productos():
     return render_template('productos.html')
 
 @app.route('/compras')
-def compras():        
-    return render_template('compras.html')
+def compras():   
+    
+    nombreProductos = []
+    
+    query = text("SELECT nombres, apellidos, empresa FROM Proveedor")
+    resultados = db.execute(query).fetchall()
+    
+    proveedores = [{"nombre": fila[0], "apellido": fila[1], "empresa": fila[2]} for fila in resultados]
+    
+    query = text("SELECT codigo,nombre, descripcion, precio_unitario FROM Producto")
+    produc = db.execute(query).fetchall()
+    
+    print("====================================")
+    for i in produc:
+        nombreProductos.append(f"{i[0]}-{i[1]}-{i[2]}-C${i[3]}")    
+    
+    return render_template('compras.html', proveedores=proveedores, producto=json.dumps(nombreProductos))
 
 @app.route('/danado')
 def danado():        
@@ -188,7 +203,7 @@ def editar_producto():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
-    
+
 @app.route('/eliminar_producto/<int:id>', methods=['DELETE'])
 def eliminar_producto(id):
     try:
@@ -200,7 +215,6 @@ def eliminar_producto(id):
     except Exception as e:
         print(f"Error al eliminar: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/cargarClientes', methods=['POST', 'GET'])
 def cargarClientes():
@@ -304,11 +318,12 @@ def proveedores():
         query = text("SELECT * FROM Proveedor")
         result = db.execute(query)
         proveedores = result.fetchall()
+        # Convertir los resultados en una lista de diccionarios
+        proveedores = [dict(proveedor) for proveedor in proveedores]
         return render_template('proveedores.html', proveedores=proveedores)
     except Exception as e:
         traceback.print_exc()
     return render_template('proveedores.html')
-
 
 @app.route('/consumido')
 def consumido():
@@ -426,7 +441,145 @@ def agregar_producto():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+@app.route('/registrar_compra', methods=['POST'])
+def registrar_compra():
+    try:
+        # Datos enviados desde el frontend
+        data = request.json
+        fecha = data.get('fecha')
+        id_proveedor = data.get('id_proveedor')
+        productos = data.get('productos')  # Lista de {codigo_producto, cantidad}
+
+        # Validación de datos incompletos
+        if not fecha or not id_proveedor or not productos:
+            return jsonify({'error': 'Datos incompletos'}), 400
+
+        # Verificar si `id_proveedor` es un nombre en lugar de un ID y obtener el ID correspondiente
+        if isinstance(id_proveedor, str):  # Asumiendo que si es string, es el nombre
+            query = text("SELECT id FROM Proveedor WHERE nombres = :nombres")
+            result = db.execute(query, {'nombres': id_proveedor}).fetchone()
+            if result:
+                id_proveedor = result[0]  # Reemplaza `id_proveedor` con el ID
+            else:
+                return jsonify({'error': 'Proveedor no encontrado'}), 400
+
+        # Calcular el total de la compra
+        total = 0
+        for producto in productos:
+            query = text("SELECT precio_unitario FROM Producto WHERE codigo = :codigo")
+            result = db.execute(query, {'codigo': producto['codigo_producto']}).fetchone()
+            if not result:
+                return jsonify({'error': f"Producto con código {producto['codigo_producto']} no encontrado"}), 400
+
+            precio_unitario = result[0]
+            total += precio_unitario * producto['cantidad']
+
+        # Insertar la compra en la tabla Compra
+        query = text("""
+            INSERT INTO Compra (fecha, total, id_proveedor)
+            VALUES (:fecha, :total, :id_proveedor)
+            RETURNING id
+        """)
+        compra_id = db.execute(query, {'fecha': fecha, 'total': total, 'id_proveedor': id_proveedor}).fetchone()[0]
+
+        # Insertar detalles de la compra en DetalleCompra
+        for producto in productos:
+            query = text("""
+                INSERT INTO DetalleCompra (cantidad, codigo_producto, id_compra)
+                VALUES (:cantidad, :codigo_producto, :id_compra)
+            """)
+            db.execute(query, {
+                'cantidad': producto['cantidad'],
+                'codigo_producto': producto['codigo_producto'],
+                'id_compra': compra_id
+            })
+
+            # Actualizar la cantidad del producto en la tabla Producto
+            query = text("""
+                UPDATE Producto
+                SET cantidad = cantidad + :cantidad
+                WHERE codigo = :codigo_producto
+            """)
+            db.execute(query, {
+                'cantidad': producto['cantidad'],
+                'codigo_producto': producto['codigo_producto']
+            })
+
+        db.commit()  # Confirmar las transacciones
+
+        return jsonify({'message': 'Compra registrada exitosamente', 'compra_id': compra_id}), 201
+
+    except Exception as e:
+        db.rollback()  # Revertir cambios en caso de error
+        return jsonify({'error': str(e)}), 500
     
+@app.route('/buscar_proveedores', methods=['GET'])
+def buscar_proveedores():
+    query = request.args.get('query', '')
+    try:
+        query_sql = text("SELECT * FROM Proveedor WHERE nombres LIKE :query OR apellidos LIKE :query OR empresa LIKE :query")
+        result = db.execute(query_sql, {'query': f'%{query}%'})
+        proveedores = result.fetchall()
+        proveedores = [dict(proveedor) for proveedor in proveedores]  # Convertir a diccionario
+        return jsonify({'proveedores': proveedores})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/agregar_vendedor', methods=['POST'])
+def agregar_vendedor():
+    try:
+        data = request.get_json()
+        nombres = data['nombres']
+        apellidos = data['apellidos']
+        empresa = data['empresa']
+        telefono = data['telefono']
+
+        query = text("""
+            INSERT INTO Proveedor (nombres, apellidos, empresa, telefono)
+            VALUES (:nombres, :apellidos, :empresa, :telefono)
+        """)
+        db.execute(query, {'nombres': nombres, 'apellidos': apellidos, 'empresa': empresa, 'telefono': telefono})
+        db.commit()
+        return jsonify({'message': 'Vendedor agregado correctamente'}), 201
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+# Ruta para editar un vendedor
+@app.route('/editar_vendedor/<int:id>', methods=['PUT'])
+def editar_vendedor(id):
+    try:
+        data = request.get_json()
+        nombres = data['nombres']
+        apellidos = data['apellidos']
+        empresa = data['empresa']
+        telefono = data['telefono']
+
+        query = text("""
+            UPDATE Proveedor
+            SET nombres = :nombres, apellidos = :apellidos, empresa = :empresa, telefono = :telefono
+            WHERE id = :id
+        """)
+        db.execute(query, {'id': id, 'nombres': nombres, 'apellidos': apellidos, 'empresa': empresa, 'telefono': telefono})
+        db.commit()
+        return jsonify({'message': 'Vendedor actualizado correctamente'}), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+# Ruta para eliminar un vendedor
+@app.route('/eliminar_vendedor/<int:id>', methods=['DELETE'])
+def eliminar_vendedor(id):
+    try:
+        query = text("DELETE FROM Proveedor WHERE id = :id")
+        db.execute(query, {'id': id})
+        db.commit()
+        return jsonify({'message': 'Vendedor eliminado correctamente'}), 200
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
     
 @app.route('/creditoCliente', methods=['POST'])
 def creditoCliente():
